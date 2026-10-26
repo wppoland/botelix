@@ -9,6 +9,7 @@ tests
 scripts
 phpunit.xml.dist
 phpcs.xml.dist
+phpstan.neon.dist
 composer.json
 composer.lock
 vendor
