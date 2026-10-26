@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ruleset name="Botelix">
+    <description>PHPCS rules for Botelix</description>
+
+    <file>botelix.php</file>
+    <file>uninstall.php</file>
+    <file>src</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+
+    <rule ref="WordPress-Core"/>
+    <rule ref="WordPress-Docs"/>
+</ruleset>

@@ -1,0 +1,13 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - botelix.php
+        - uninstall.php
+        - src
+    excludePaths:
+        - vendor/
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
