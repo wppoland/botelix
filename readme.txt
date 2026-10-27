@@ -4,7 +4,7 @@ Tags: woocommerce, deposit return, pfand, sgr, kaucja
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,11 @@ Yes. When "Cross-Border Destination Matching" is enabled, Botelix checks the cus
 Yes. Botelix uses the native WooCommerce cart fees API and declares full compatibility with WooCommerce Cart and Checkout Blocks and High-Performance Order Storage (HPOS).
 
 == Changelog ==
+
+= 1.0.1 =
+* Enhance Plugin Check compliance: add nonce verification and user capability checks on product save.
+* Add translators comments for placeholders in admin strings.
+* Optimize short description under 150 characters.
 
 = 1.0.0 =
 * Initial release: Statutory Deposit Return Scheme (DRS) support for Poland, Romania, Germany, Austria, Slovakia, Hungary, and custom schemes.
