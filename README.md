@@ -1,4 +1,4 @@
-# Botelix - Deposit Return Scheme for WooCommerce
+# Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh)
 
 Multi-country statutory deposit return scheme (DRS / Pfand / SGR / Kaucja / Zaloh / Visszavaltasi dij) compliance for WooCommerce stores.
 

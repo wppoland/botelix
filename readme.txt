@@ -1,4 +1,4 @@
-=== Botelix - Deposit Return Scheme for WooCommerce (Pfand, SGR, Kaucja, Zaloh) ===
+=== Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh) ===
 Contributors: motylanogha
 Tags: woocommerce, deposit return, pfand, sgr, kaucja
 Requires at least: 6.5
