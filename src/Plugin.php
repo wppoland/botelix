@@ -42,13 +42,6 @@ final class Plugin
         $this->depositService->registerHooks();
         $this->productMetaBox->registerHooks();
         $this->settingsPage->registerHooks();
-
-        add_action('init', [$this, 'loadTextdomain']);
-    }
-
-    public function loadTextdomain(): void
-    {
-        load_plugin_textdomain('botelix', false, dirname(plugin_basename(PLUGIN_FILE)) . '/languages');
     }
 
     public function getDepositService(): DepositService

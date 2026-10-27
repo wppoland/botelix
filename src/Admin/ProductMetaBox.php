@@ -35,6 +35,8 @@ final class ProductMetaBox implements HasHooks
 
     public function renderProductFields(): void
     {
+        wp_nonce_field('botelix_save_product_fields', 'botelix_product_nonce');
+
         echo '<div class="options_group botelix-options-group">';
         echo '<h4 style="padding-left:12px;">' . esc_html__('Deposit Return Scheme (DRS / Pfand / Kaucja)', 'botelix') . '</h4>';
 
@@ -73,14 +75,31 @@ final class ProductMetaBox implements HasHooks
 
     public function saveProductFields(int $productId): void
     {
+        if (
+            ! isset($_POST['botelix_product_nonce']) ||
+            ! wp_verify_nonce(sanitize_key(wp_unslash($_POST['botelix_product_nonce'])), 'botelix_save_product_fields')
+        ) {
+            return;
+        }
+
+        if (! current_user_can('edit_post', $productId)) {
+            return;
+        }
+
         $product = wc_get_product($productId);
         if (! $product instanceof \WC_Product) {
             return;
         }
 
-        $scheme = isset($_POST[DepositService::META_SCHEME]) ? sanitize_key((string) $_POST[DepositService::META_SCHEME]) : '';
-        $type   = isset($_POST[DepositService::META_TYPE]) ? sanitize_key((string) $_POST[DepositService::META_TYPE]) : '';
-        $units  = isset($_POST[DepositService::META_UNITS]) ? max(1, (int) $_POST[DepositService::META_UNITS]) : 1;
+        $scheme = isset($_POST[DepositService::META_SCHEME])
+            ? sanitize_key(wp_unslash($_POST[DepositService::META_SCHEME]))
+            : '';
+        $type = isset($_POST[DepositService::META_TYPE])
+            ? sanitize_key(wp_unslash($_POST[DepositService::META_TYPE]))
+            : '';
+        $units = isset($_POST[DepositService::META_UNITS])
+            ? max(1, absint(wp_unslash($_POST[DepositService::META_UNITS])))
+            : 1;
 
         $product->update_meta_data(DepositService::META_SCHEME, $scheme);
         $product->update_meta_data(DepositService::META_TYPE, $type);
@@ -131,16 +150,41 @@ final class ProductMetaBox implements HasHooks
 
     public function saveVariationFields(int $variationId, int $i): void
     {
+        $nonceValid = false;
+        if (
+            isset($_POST['botelix_product_nonce']) &&
+            wp_verify_nonce(sanitize_key(wp_unslash($_POST['botelix_product_nonce'])), 'botelix_save_product_fields')
+        ) {
+            $nonceValid = true;
+        } elseif (
+            isset($_POST['security']) &&
+            wp_verify_nonce(sanitize_key(wp_unslash($_POST['security'])), 'save-variations')
+        ) {
+            $nonceValid = true;
+        }
+
+        if (! $nonceValid) {
+            return;
+        }
+
+        if (! current_user_can('edit_post', $variationId)) {
+            return;
+        }
+
         $product = wc_get_product($variationId);
         if (! $product instanceof \WC_Product) {
             return;
         }
 
-        $typeArr  = isset($_POST[DepositService::META_TYPE]) && is_array($_POST[DepositService::META_TYPE]) ? $_POST[DepositService::META_TYPE] : [];
-        $unitsArr = isset($_POST[DepositService::META_UNITS]) && is_array($_POST[DepositService::META_UNITS]) ? $_POST[DepositService::META_UNITS] : [];
+        $type = '';
+        if (isset($_POST[DepositService::META_TYPE][$i])) {
+            $type = sanitize_key(wp_unslash($_POST[DepositService::META_TYPE][$i]));
+        }
 
-        $type  = isset($typeArr[$i]) ? sanitize_key((string) $typeArr[$i]) : '';
-        $units = isset($unitsArr[$i]) ? max(1, (int) $unitsArr[$i]) : 1;
+        $units = 1;
+        if (isset($_POST[DepositService::META_UNITS][$i])) {
+            $units = max(1, absint(wp_unslash($_POST[DepositService::META_UNITS][$i])));
+        }
 
         $product->update_meta_data(DepositService::META_TYPE, $type);
         $product->update_meta_data(DepositService::META_UNITS, $units);

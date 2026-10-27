@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh)
  * Plugin URI:        https://plogins.com/botelix/
- * Description:       Statutory deposit return scheme (DRS) calculations and checkout fees for European beverage packaging: German Pfand, Romanian SGR, Polish kaucja, Austrian Einwegpfand, Slovak zaloh, and Hungarian visszavaltasi dij.
+ * Description:       Statutory container deposit scheme (DRS) calculations and checkout fees for European ecommerce (Pfand, SGR, Kaucja, Zaloh, Einwegpfand).
  * Version:           1.0.0
  * Requires at least: 6.5
  * Requires PHP:      8.1
