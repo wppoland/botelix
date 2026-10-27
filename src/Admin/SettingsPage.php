@@ -167,7 +167,10 @@ final class SettingsPage implements HasHooks
                                     <th scope="row"><?php echo esc_html__('Product Notice Template', 'botelix'); ?></th>
                                     <td>
                                         <input type="text" class="large-text" name="<?php echo esc_attr(DepositService::OPTION); ?>[product_notice_<?php echo esc_attr($schemeId); ?>]" value="<?php echo esc_attr($settings['product_notice_' . $schemeId] ?? $scheme['default_notice']); ?>" />
-                                        <p class="description"><?php echo esc_html__('Use {amount} or %s for formatted deposit amount.', 'botelix'); ?></p>
+                                        <p class="description"><?php
+                                            /* translators: %s: placeholder token for formatted deposit amount */
+                                            echo esc_html__('Use {amount} or %s for formatted deposit amount.', 'botelix');
+                                        ?></p>
                                     </td>
                                 </tr>
                                 <?php if (! empty($scheme['types']) && is_array($scheme['types'])) : ?>
