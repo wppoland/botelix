@@ -34,7 +34,7 @@ final class Plugin
     {
         $this->depositService = new DepositService();
         $this->productMetaBox = new ProductMetaBox($this->depositService);
-        $this->settingsPage   = new SettingsPage();
+        $this->settingsPage   = new SettingsPage($this->depositService);
     }
 
     public function boot(): void

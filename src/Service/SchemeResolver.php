@@ -13,7 +13,7 @@ defined('ABSPATH') || exit;
  */
 final class SchemeResolver
 {
-    private const COUNTRY_MAP = [
+    public const COUNTRY_MAP = [
         'PL' => Scheme::SCHEME_PL,
         'RO' => Scheme::SCHEME_RO,
         'AT' => Scheme::SCHEME_AT,

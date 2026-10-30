@@ -3,7 +3,7 @@
  * Plugin Name:       Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh)
  * Plugin URI:        https://plogins.com/botelix/
  * Description:       Statutory container deposit scheme (DRS) calculations and checkout fees for European ecommerce (Pfand, SGR, Kaucja, Zaloh, Einwegpfand).
- * Version:           1.0.2
+ * Version:           1.1.0
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Requires Plugins:  woocommerce
@@ -25,7 +25,7 @@ namespace Botelix;
 
 defined('ABSPATH') || exit;
 
-const VERSION     = '1.0.2';
+const VERSION     = '1.1.0';
 const PLUGIN_FILE = __FILE__;
 
 define('BOTELIX_DIR', plugin_dir_path(__FILE__));
@@ -45,7 +45,7 @@ add_action('plugins_loaded', static function (): void {
     if (! class_exists('WooCommerce')) {
         add_action('admin_notices', static function (): void {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__('Botelix - Deposit Return Scheme for WooCommerce requires WooCommerce to be active.', 'botelix');
+            echo esc_html__('Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh) requires WooCommerce to be active.', 'botelix');
             echo '</p></div>';
         });
         return;
