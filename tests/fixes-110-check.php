@@ -2,7 +2,8 @@
 /**
  * Self-check for the 1.1.0 fixes: defaults without a save, notice placeholders,
  * VAT-inclusive deposits, cross-border container mapping with the currency rule,
- * and the notice on block single-product templates.
+ * the notice on block single-product templates, VAT-exempt customers, legacy
+ * container keys, the product editor's scheme override and the settings screen.
  *
  * Each section reports on its own, so a run against older code shows which
  * fixes are missing. Run: php tests/fixes-110-check.php
@@ -81,7 +82,51 @@ function wc_get_price_decimals(): int
 }
 function wc_tax_enabled(): bool
 {
+    return $GLOBALS['tax_enabled'] ?? true;
+}
+function esc_html__(string $text, string $domain = 'default'): string
+{
+    return $text;
+}
+function esc_html(string $text): string
+{
+    return $text;
+}
+function esc_attr(string $text): string
+{
+    return $text;
+}
+function checked(mixed $checked, mixed $current = true): void
+{
+}
+function selected(mixed $selected, mixed $current = true): void
+{
+}
+function settings_fields(string $group): void
+{
+}
+function submit_button(): void
+{
+}
+function current_user_can(string $cap, mixed ...$args): bool
+{
     return true;
+}
+function wp_nonce_field(string $action, string $name): void
+{
+}
+function get_post_meta(int $id, string $key, bool $single = false): mixed
+{
+    return wc_get_product($id)?->get_meta($key);
+}
+/** @param array<string, mixed> $field */
+function woocommerce_wp_select(array $field): void
+{
+    $GLOBALS['fields'][$field['id']] = $field;
+}
+/** @param array<string, mixed> $field */
+function woocommerce_wp_text_input(array $field): void
+{
 }
 function wc_format_localized_decimal(string $value): string
 {
@@ -91,7 +136,7 @@ function wc_format_localized_decimal(string $value): string
 class WC_Product
 {
     /** @param array<string, mixed> $meta */
-    public function __construct(private int $id, private array $meta = [], private string $taxClass = '')
+    public function __construct(private int $id, private array $meta = [], private string $taxClass = '', private int $parentId = 0)
     {
         $GLOBALS['products'][$id] = $this;
     }
@@ -101,7 +146,7 @@ class WC_Product
     }
     public function get_parent_id(): int
     {
-        return 0;
+        return $this->parentId;
     }
     public function get_meta(string $key, bool $single = true): mixed
     {
@@ -114,6 +159,17 @@ class WC_Product
     public function is_taxable(): bool
     {
         return true;
+    }
+}
+
+class WC_Customer
+{
+    public function __construct(private bool $exempt = false)
+    {
+    }
+    public function get_is_vat_exempt(): bool
+    {
+        return $this->exempt;
     }
 }
 
@@ -165,7 +221,7 @@ class WC_Cart
     }
     public function get_customer(): mixed
     {
-        return null;
+        return $GLOBALS['customer'] ?? null;
     }
     public function fees_api(): self
     {
@@ -175,20 +231,46 @@ class WC_Cart
     {
         $this->fees[] = is_array($args) ? $args : ['id' => '', 'name' => $args, 'amount' => $amount, 'taxable' => $taxable];
     }
-    /** What the customer pays for all deposit fees, fee tax included. */
+    /** What the customer pays for all deposit fees, fee tax included (none for a VAT-exempt customer, as in WooCommerce). */
     public function gross(): float
     {
-        $sum = 0.0;
+        $exempt = $this->get_customer()?->get_is_vat_exempt() ?? false;
+        $sum    = 0.0;
         foreach ($this->fees as $fee) {
-            $rate = empty($fee['taxable']) ? 0.0 : array_sum(array_column(WC_Tax::get_rates((string) ($fee['tax_class'] ?? '')), 'rate'));
+            $rate = empty($fee['taxable']) || $exempt ? 0.0 : array_sum(array_column(WC_Tax::get_rates((string) ($fee['tax_class'] ?? '')), 'rate'));
             $sum += round((float) $fee['amount'] * (1 + $rate / 100), 2);
         }
         return round($sum, 2);
     }
 }
 
+use Botelix\Admin\ProductMetaBox;
+use Botelix\Admin\SettingsPage;
 use Botelix\Model\Scheme;
 use Botelix\Service\DepositService as DS;
+
+/**
+ * The container select the product editor renders for a product.
+ *
+ * @return array<string, mixed>
+ */
+function editorField(DS $svc, int $productId): array
+{
+    global $thepostid;
+    $thepostid = $productId;
+    $GLOBALS['fields'] = [];
+    ob_start();
+    (new ProductMetaBox($svc))->renderProductFields();
+    ob_end_clean();
+    return $GLOBALS['fields'][DS::META_TYPE];
+}
+
+function settingsHtml(DS $svc): string
+{
+    ob_start();
+    (new SettingsPage($svc))->renderPage();
+    return (string) ob_get_clean();
+}
 
 /** @param array<string, mixed>|null $settings */
 function service(?array $settings, string $currency): DS
@@ -312,6 +394,72 @@ section('5 notice on block single-product templates, printed once', function ():
     ob_start();
     $svc->renderProductNotice();
     check((string) ob_get_clean() === '', 'summary hook printed the notice a second time');
+});
+
+section('6 VAT-exempt customer on DE pays the full 0.25 EUR, untaxed', function (): void {
+    $svc  = service(['enabled' => '1', 'default_scheme' => 'de', 'enable_destination_matching' => '0'], 'EUR');
+    $GLOBALS['customer'] = new WC_Customer(true);
+    $cart = new WC_Cart([['data' => new WC_Product(60, [DS::META_TYPE => 'can']), 'quantity' => 1]]);
+    $svc->applyCartFee($cart);
+    $paid = $cart->gross();
+    $GLOBALS['customer'] = new WC_Customer(false);
+    check(abs($paid - 0.25) < 1e-9, 'exempt customer pays ' . $paid . ' instead of 0.25');
+    check(empty($cart->fees[0]['taxable']), 'exempt customer fee must be untaxed');
+
+    $cart = new WC_Cart([['data' => new WC_Product(61, [DS::META_TYPE => 'can']), 'quantity' => 1]]);
+    $svc->applyCartFee($cart);
+    unset($GLOBALS['customer']);
+    check(abs($cart->gross() - 0.25) < 1e-9 && ! empty($cart->fees[0]['taxable']), 'taxed customer must still pay 0.25 with VAT inside');
+});
+
+section('7 ambiguous legacy key keeps its own scheme and invents no material', function (): void {
+    $svc    = service(['enabled' => '1', 'default_scheme' => 'de'], 'EUR');
+    $einweg = new WC_Product(70, [DS::META_TYPE => 'einweg']);
+    check(abs($svc->depositFor($einweg, 'de') - 0.25) < 1e-9, 'legacy einweg must keep 0.25 in DE');
+    check(abs($svc->depositFor($einweg, 'at') - 0.25) < 1e-9, 'legacy einweg must keep 0.25 in AT');
+    check($svc->depositFor($einweg, 'sk') === 0.0, 'legacy einweg (maybe glass) must not be charged as SK plastic');
+    $field = editorField($svc, 70);
+    check($field['value'] === 'einweg', 'editor preselects ' . $field['value'] . ' instead of the stored einweg');
+    check(str_contains((string) ($field['options']['einweg'] ?? ''), 'legacy'), 'editor must list einweg as the current legacy setting');
+
+    // Every scheme reads the custom scheme's custom_1 the same way: no single material.
+    $svc = service(['enabled' => '1', 'default_scheme' => 'custom'], 'EUR');
+    check($svc->depositFor(new WC_Product(71, [DS::META_TYPE => 'custom_1']), 'sk') === 0.0, 'legacy custom_1 must not be charged as SK plastic');
+    $svc = service(['enabled' => '1', 'default_scheme' => 'hu'], 'HUF');
+    check($svc->depositFor(new WC_Product(72, [DS::META_TYPE => 'drs_reusable']), 'custom') === 0.0, 'legacy drs_reusable (material unknown) must not be read as reusable glass');
+
+    // An unambiguous key still preselects its category, which charges the same everywhere.
+    $svc = service(['enabled' => '1', 'default_scheme' => 'pl'], 'PLN');
+    new WC_Product(73, [DS::META_TYPE => 'pet']);
+    check(editorField($svc, 73)['value'] === 'plastic', 'legacy pet must preselect the plastic category');
+});
+
+section('8 product editor follows the product scheme override', function (): void {
+    $svc = service(['enabled' => '1', 'default_scheme' => 'at', 'enable_destination_matching' => '0'], 'EUR');
+    new WC_Product(80, [DS::META_TYPE => 'mehrweg_bier', DS::META_SCHEME => 'de']);
+    $field = editorField($svc, 80);
+    check($field['value'] === 'mehrweg_bier', 'editor preselects ' . $field['value'] . ' instead of mehrweg_bier');
+    check(! str_contains((string) ($field['options']['mehrweg_bier'] ?? ''), 'legacy') && isset($field['options']['mehrweg_bier']), 'DE override must list mehrweg_bier as a DE type');
+    $saved = new WC_Product(81, [DS::META_TYPE => $field['value'], DS::META_SCHEME => 'de']);
+    check(abs($svc->depositFor($saved) - 0.08) < 1e-9, 'a plain save drops the DE Mehrweg deposit to ' . $svc->depositFor($saved));
+
+    // A variation with its own container is charged under the parent's override.
+    new WC_Product(82, [DS::META_TYPE => 'can', DS::META_SCHEME => 'de']);
+    $variation = new WC_Product(83, [DS::META_TYPE => 'mehrweg_mineral'], '', 82);
+    check(abs($svc->depositFor($variation) - 0.15) < 1e-9, 'variation ignores the parent DE override');
+});
+
+section('9 settings: VAT label needs WooCommerce taxes, currency warning needs the plugin on', function (): void {
+    $GLOBALS['tax_enabled'] = false;
+    $html = settingsHtml(service(['enabled' => '1', 'default_scheme' => 'de'], 'EUR'));
+    $GLOBALS['tax_enabled'] = true;
+    $taxBack = 'WooCommerce adds the tax back';
+    check(! str_contains($html, $taxBack) && str_contains($html, 'WooCommerce taxes are off'), 'net-share VAT label shown with WooCommerce taxes off');
+    check(str_contains(settingsHtml(service(['enabled' => '1', 'default_scheme' => 'de'], 'EUR')), $taxBack), 'VAT label missing with taxes on');
+
+    $warning = 'These schemes charge nothing in this store';
+    check(str_contains(settingsHtml(service(['enabled' => '1', 'default_scheme' => 'pl'], 'PLN')), $warning), 'currency warning missing while enabled');
+    check(! str_contains(settingsHtml(service(['enabled' => '0', 'default_scheme' => 'pl'], 'PLN')), $warning), 'currency warning shown while the plugin is disabled');
 });
 
 echo $failed === 0 ? "\nALL 1.1.0 CHECKS PASSED\n" : "\n$failed SECTION(S) FAILED\n";

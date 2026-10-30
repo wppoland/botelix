@@ -90,6 +90,8 @@ Yes. Botelix uses the native WooCommerce cart fees API and declares full compati
 * Fixed: cross-border matching charged nothing for a product shipped to another scheme, and charged rates in the wrong currency.
 * Fixed: the deposit notice was missing on block single-product templates.
 * Changed: products are tagged with a container type that every scheme maps to its own rate; existing products keep working.
+* Changed: a product saved before 1.1.0 with a type that covered several materials (such as the German Einweg) keeps its own scheme's rate, is charged nothing where the material decides the rate, and shows as the current legacy setting in the editor until you pick a container.
+* Fixed: the product editor listed the store default scheme's containers instead of the product's scheme override, so saving a German Mehrweg product could drop its deposit; variations now follow the parent's override as well.
 * Changed: a scheme is only charged when its currency equals the store currency; the settings screen lists the schemes that cannot be charged.
 * Changed: Austria is added without VAT and its notice no longer says "inkl. USt.", as the regulation states no VAT.
 * Changed: Slovakia uses the statutory minimums, 0.12 EUR for plastic bottles and 0.10 EUR for cans; the administrator's rate goes in the settings.

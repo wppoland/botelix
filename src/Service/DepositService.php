@@ -31,19 +31,21 @@ final class DepositService implements HasHooks
     ];
 
     /**
-     * Scheme-specific type keys saved before 1.1.0, read as a neutral container
-     * category when the active scheme has no type of that name.
+     * Scheme-specific type keys saved before 1.1.0, with every container category
+     * the old type covered. Another scheme charges one only when all of them map
+     * to the same type there, so no material is guessed. drs_reusable is left
+     * out: the old HU type did not say what the container is made of.
      */
     private const LEGACY_CONTAINERS = [
-        'pet' => 'plastic',
-        'einweg' => 'plastic',
-        'sgr_single_use' => 'plastic',
-        'zaloh_single_use' => 'plastic',
-        'drs_single_use' => 'plastic',
-        'custom_1' => 'plastic',
-        'mehrweg_bier' => 'glass_reusable',
-        'mehrweg_mineral' => 'glass_reusable',
-        'drs_reusable' => 'glass_reusable',
+        'pet' => ['plastic'],
+        // DE einweg covered every single-use material, AT einweg plastic and cans.
+        'einweg' => ['plastic', 'glass', 'can'],
+        'sgr_single_use' => ['plastic', 'glass', 'can'],
+        'zaloh_single_use' => ['plastic', 'can'],
+        'drs_single_use' => ['plastic', 'glass', 'can'],
+        'custom_1' => ['plastic', 'glass', 'can', 'glass_reusable'],
+        'mehrweg_bier' => ['glass_reusable'],
+        'mehrweg_mineral' => ['glass_reusable'],
     ];
 
     private SchemeResolver $resolver;
@@ -86,16 +88,17 @@ final class DepositService implements HasHooks
     }
 
     /**
-     * Container options for the product editor: the neutral categories plus the
-     * default scheme's own types that no category maps to (e.g. DE Mehrweg).
+     * Container options for the product editor under a scheme (the product's
+     * override, else the store default): the neutral categories plus the scheme's
+     * own types that no category maps to (e.g. DE Mehrweg). A stored value the
+     * editor cannot preselect stays listed as the current legacy setting, so a
+     * plain save keeps it.
      *
      * @return array<string, string>
      */
-    public function getPackagingTypeOptions(?string $schemeId = null): array
+    public function getPackagingTypeOptions(?string $schemeId = null, string $stored = ''): array
     {
-        $schemeId = $schemeId ?: (string) $this->settings['default_scheme'];
-        $scheme   = Scheme::get($schemeId);
-
+        $scheme  = Scheme::get($schemeId ?: (string) $this->settings['default_scheme']);
         $options = ['' => __('None (not covered by deposit scheme)', 'botelix')] + Scheme::containers();
 
         if ($scheme !== null) {
@@ -107,20 +110,41 @@ final class DepositService implements HasHooks
             }
         }
 
+        if ($stored !== '' && ! isset($options[$stored]) && $this->containerOptionValue($stored, $schemeId) === $stored) {
+            $label = $stored;
+            foreach ([$scheme] + Scheme::all() as $candidate) {
+                if (isset($candidate['types'][$stored]['label'])) {
+                    $label = (string) $candidate['types'][$stored]['label'];
+                    break;
+                }
+            }
+            /* translators: %s: container type label saved before Botelix 1.1.0 */
+            $options[$stored] = sprintf(__('Current setting (legacy): %s', 'botelix'), $label);
+        }
+
         return $options;
     }
 
     /**
-     * Value to preselect for a stored container meta, so a pre-1.1.0 key is shown
-     * as its category and a plain save keeps the deposit.
+     * Value to preselect for a stored container meta. A pre-1.1.0 key becomes its
+     * category only when that charges the same under every scheme; otherwise the
+     * key itself stays selected.
      */
-    public function containerOptionValue(string $stored): string
+    public function containerOptionValue(string $stored, ?string $schemeId = null): string
     {
-        if (isset($this->getPackagingTypeOptions()[$stored])) {
+        $categories = self::LEGACY_CONTAINERS[$stored] ?? [];
+
+        if (count($categories) !== 1 || isset($this->getPackagingTypeOptions($schemeId)[$stored])) {
             return $stored;
         }
 
-        return self::LEGACY_CONTAINERS[$stored] ?? '';
+        foreach (array_keys(Scheme::all()) as $id) {
+            if ($this->typeKeyFor($categories[0], $id) !== $this->typeKeyFor($stored, $id)) {
+                return $stored;
+            }
+        }
+
+        return $categories[0];
     }
 
     /**
@@ -144,9 +168,29 @@ final class DepositService implements HasHooks
             return $stored;
         }
 
-        $category = self::LEGACY_CONTAINERS[$stored] ?? null;
+        $types = [];
+        foreach (self::LEGACY_CONTAINERS[$stored] ?? [] as $category) {
+            $types[] = isset($map[$category]) ? (string) $map[$category] : null;
+        }
+        $types = array_unique($types, SORT_REGULAR);
 
-        return $category !== null && isset($map[$category]) ? (string) $map[$category] : null;
+        return count($types) === 1 ? $types[0] : null;
+    }
+
+    /**
+     * The product's scheme override; a variation, which has no override field of
+     * its own, takes its parent's.
+     */
+    public function schemeOverride(\WC_Product $product): string
+    {
+        $override = (string) $product->get_meta(self::META_SCHEME, true);
+
+        if ($override === '' && $product->get_parent_id() > 0) {
+            $parent   = wc_get_product($product->get_parent_id());
+            $override = $parent instanceof \WC_Product ? (string) $parent->get_meta(self::META_SCHEME, true) : '';
+        }
+
+        return $override;
     }
 
     /**
@@ -252,7 +296,7 @@ final class DepositService implements HasHooks
 
         $stored   = (string) $source->get_meta(self::META_TYPE, true);
         $units    = $source->get_meta(self::META_UNITS, true);
-        $override = (string) $source->get_meta(self::META_SCHEME, true);
+        $override = $this->schemeOverride($source);
         $active   = $override !== '' ? $override : $resolved;
 
         if ($stored === '' || ! $this->isChargeable($active)) {
@@ -272,8 +316,9 @@ final class DepositService implements HasHooks
      *
      * Where the act states the deposit including VAT (DE), the fee is the net
      * share of the gross deposit in the product's tax class, so WooCommerce's
-     * fee tax brings it back to exactly the statutory amount. Elsewhere the
-     * deposit sits outside the VAT base and is added untaxed.
+     * fee tax brings it back to exactly the statutory amount. A VAT-exempt
+     * customer, a non-taxable product or a store without taxes gets the gross
+     * untaxed. Elsewhere the deposit sits outside the VAT base and is added untaxed.
      */
     public function applyCartFee(\WC_Cart $cart): void
     {
@@ -285,6 +330,10 @@ final class DepositService implements HasHooks
         if ($schemeId === null) {
             return;
         }
+
+        // WooCommerce charges a VAT-exempt customer no tax, so the gross goes in untaxed.
+        $customer = $cart->get_customer();
+        $exempt   = $customer instanceof \WC_Customer && $customer->get_is_vat_exempt();
 
         // Gross deposit per "scheme|tax class"; class 'untaxed' carries no tax.
         $groups = [];
@@ -300,7 +349,7 @@ final class DepositService implements HasHooks
                 continue;
             }
 
-            $class = $this->isTaxable($active) && $product->is_taxable() ? $product->get_tax_class() : 'untaxed';
+            $class = $this->isTaxable($active) && $product->is_taxable() && ! $exempt ? $product->get_tax_class() : 'untaxed';
             $key   = $active . '|' . $class;
 
             $groups[$key] = ($groups[$key] ?? 0.0) + $deposit * max(1, (int) ($cartItem['quantity'] ?? 1));
@@ -340,7 +389,7 @@ final class DepositService implements HasHooks
         }
     }
 
-    private function isTaxable(string $schemeId): bool
+    public function isTaxable(string $schemeId): bool
     {
         $flag = (bool) (Scheme::get($schemeId)['taxable'] ?? false);
 

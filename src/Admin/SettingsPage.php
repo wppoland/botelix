@@ -101,7 +101,7 @@ final class SettingsPage implements HasHooks
             </p>
 
             <?php
-            $unchargeable = $this->depositService->unchargeableSchemes();
+            $unchargeable = $this->depositService->isEnabled() ? $this->depositService->unchargeableSchemes() : [];
             if ($unchargeable !== []) :
                 ?>
                 <div class="notice notice-warning inline">
@@ -180,7 +180,15 @@ final class SettingsPage implements HasHooks
                         <div class="botelix-scheme-card" style="background:#fff; border:1px solid #ccd0d4; padding:15px; margin-bottom:15px; border-radius:4px;">
                             <h3><?php echo esc_html($scheme['name']); ?></h3>
                             <p><strong><?php echo esc_html__('Legal basis:', 'botelix'); ?></strong> <code><?php echo esc_html($scheme['law']); ?></code></p>
-                            <p><strong><?php echo esc_html__('Tax status:', 'botelix'); ?></strong> <?php echo apply_filters('botelix_scheme_taxable', (bool) $scheme['taxable'], $schemeId) ? esc_html__('Amount includes VAT: the fee is the net share and WooCommerce adds the tax back', 'botelix') : esc_html__('Non-taxable fee (outside VAT base)', 'botelix'); ?></p>
+                            <p><strong><?php echo esc_html__('Tax status:', 'botelix'); ?></strong> <?php
+                            if ($this->depositService->isTaxable($schemeId)) {
+                                echo esc_html__('Amount includes VAT: the fee is the net share and WooCommerce adds the tax back', 'botelix');
+                            } elseif (apply_filters('botelix_scheme_taxable', (bool) $scheme['taxable'], $schemeId)) {
+                                echo esc_html__('Amount includes VAT, but WooCommerce taxes are off, so the full amount is added without tax', 'botelix');
+                            } else {
+                                echo esc_html__('Non-taxable fee (outside VAT base)', 'botelix');
+                            }
+                            ?></p>
 
                             <table class="form-table" style="margin-top:0;">
                                 <tr>

@@ -37,7 +37,8 @@ final class ProductMetaBox implements HasHooks
     {
         global $thepostid;
 
-        $stored = (string) get_post_meta((int) $thepostid, DepositService::META_TYPE, true);
+        $stored   = (string) get_post_meta((int) $thepostid, DepositService::META_TYPE, true);
+        $override = (string) get_post_meta((int) $thepostid, DepositService::META_SCHEME, true);
 
         wp_nonce_field('botelix_save_product_fields', 'botelix_product_nonce');
 
@@ -62,8 +63,8 @@ final class ProductMetaBox implements HasHooks
             'label' => __('Packaging container', 'botelix'),
             'description' => __('Select the container type. Each national scheme charges its own rate for it, or nothing where it is not covered.', 'botelix'),
             'desc_tip' => true,
-            'value' => $this->depositService->containerOptionValue($stored),
-            'options' => $this->depositService->getPackagingTypeOptions(),
+            'value' => $this->depositService->containerOptionValue($stored, $override),
+            'options' => $this->depositService->getPackagingTypeOptions($override, $stored),
         ]);
 
         woocommerce_wp_text_input([
@@ -126,16 +127,17 @@ final class ProductMetaBox implements HasHooks
 
         $currentType  = (string) $product->get_meta(DepositService::META_TYPE, true);
         $currentUnits = (string) $product->get_meta(DepositService::META_UNITS, true);
+        $override     = $this->depositService->schemeOverride($product);
 
         echo '<div class="botelix-variation-fields" style="padding: 10px 0;">';
 
         woocommerce_wp_select([
             'id' => DepositService::META_TYPE . '[' . $loop . ']',
             'label' => __('Packaging container', 'botelix'),
-            'value' => $this->depositService->containerOptionValue($currentType),
+            'value' => $this->depositService->containerOptionValue($currentType, $override),
             'desc_tip' => true,
             'description' => __('Leave empty to inherit the parent packaging container setting.', 'botelix'),
-            'options' => $this->depositService->getPackagingTypeOptions(),
+            'options' => $this->depositService->getPackagingTypeOptions($override, $currentType),
             'wrapper_class' => 'form-row form-row-first',
         ]);
 

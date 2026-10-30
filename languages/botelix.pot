@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-30T13:35:07+00:00\n"
+"POT-Creation-Date: 2026-10-30T14:06:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: botelix\n"
@@ -43,45 +43,45 @@ msgstr ""
 msgid "Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh) requires WooCommerce to be active."
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:45
+#: src/Admin/ProductMetaBox.php:46
 msgid "Deposit Return Scheme (DRS / Pfand / Kaucja)"
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:47
+#: src/Admin/ProductMetaBox.php:48
 msgid "Store default scheme"
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:54
+#: src/Admin/ProductMetaBox.php:55
 msgid "Scheme override"
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:55
+#: src/Admin/ProductMetaBox.php:56
 msgid "Optionally lock this product to a specific national scheme, or leave as default."
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:62
-#: src/Admin/ProductMetaBox.php:134
+#: src/Admin/ProductMetaBox.php:63
+#: src/Admin/ProductMetaBox.php:136
 msgid "Packaging container"
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:63
+#: src/Admin/ProductMetaBox.php:64
 msgid "Select the container type. Each national scheme charges its own rate for it, or nothing where it is not covered."
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:71
-#: src/Admin/ProductMetaBox.php:144
+#: src/Admin/ProductMetaBox.php:72
+#: src/Admin/ProductMetaBox.php:146
 msgid "Container units"
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:72
+#: src/Admin/ProductMetaBox.php:73
 msgid "Number of covered containers in this item (e.g. 6 for a 6-pack). Defaults to 1."
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:137
+#: src/Admin/ProductMetaBox.php:139
 msgid "Leave empty to inherit the parent packaging container setting."
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:147
+#: src/Admin/ProductMetaBox.php:149
 msgid "Containers in this variation."
 msgstr ""
 
@@ -157,29 +157,33 @@ msgstr ""
 msgid "Tax status:"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:183
+#: src/Admin/SettingsPage.php:185
 msgid "Amount includes VAT: the fee is the net share and WooCommerce adds the tax back"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:183
+#: src/Admin/SettingsPage.php:187
+msgid "Amount includes VAT, but WooCommerce taxes are off, so the full amount is added without tax"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:189
 msgid "Non-taxable fee (outside VAT base)"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:187
+#: src/Admin/SettingsPage.php:195
 msgid "Fee Label"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:193
+#: src/Admin/SettingsPage.php:201
 msgid "Product Notice Template"
 msgstr ""
 
 #. translators: %s is shown literally: a placeholder token merchants may type
-#: src/Admin/SettingsPage.php:198
+#: src/Admin/SettingsPage.php:206
 #, php-format
 msgid "Leave empty for the default text shown in the field. Use {amount} or %s where the formatted deposit amount goes."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:204
+#: src/Admin/SettingsPage.php:212
 msgid "Statutory Rates"
 msgstr ""
 
@@ -340,7 +344,7 @@ msgid "Custom deposit scheme"
 msgstr ""
 
 #: src/Model/Scheme.php:212
-#: src/Service/DepositService.php:438
+#: src/Service/DepositService.php:487
 msgid "Deposit"
 msgstr ""
 
@@ -354,6 +358,12 @@ msgstr ""
 msgid "Standard container deposit"
 msgstr ""
 
-#: src/Service/DepositService.php:99
+#: src/Service/DepositService.php:102
 msgid "None (not covered by deposit scheme)"
+msgstr ""
+
+#. translators: %s: container type label saved before Botelix 1.1.0
+#: src/Service/DepositService.php:122
+#, php-format
+msgid "Current setting (legacy): %s"
 msgstr ""
