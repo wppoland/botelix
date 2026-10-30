@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh) 1.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/botelix\n"
-"POT-Creation-Date: 2026-10-30T13:29:26+00:00\n"
+"POT-Creation-Date: 2026-10-30T13:35:07+00:00\n"
 "PO-Revision-Date: 2026-10-30 12:00+0000\n"
 "Last-Translator: WPPoland.com\n"
 "Language-Team: German\n"
@@ -339,7 +339,7 @@ msgstr "Mehrwegverpackung (Gebühr legt der Hersteller fest, hier eintragen)"
 msgid "Custom deposit scheme"
 msgstr "Eigenes Pfandsystem"
 
-#: src/Model/Scheme.php:212 src/Service/DepositService.php:434
+#: src/Model/Scheme.php:212 src/Service/DepositService.php:438
 msgid "Deposit"
 msgstr "Pfand"
 

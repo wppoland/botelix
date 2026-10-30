@@ -12,7 +12,7 @@ Statutory container deposit scheme (DRS) calculations and checkout fees for Euro
 
 == Description ==
 
-National deposit return schemes (DRS) require retailers selling beverages in covered packaging to collect a container deposit at checkout, show the amount on product pages, and refund it when the empty packaging comes back.
+National deposit return schemes (DRS) require retailers selling beverages in covered packaging to collect a container deposit and refund it when the empty packaging comes back.
 
 Botelix gives WooCommerce stores one lightweight tool for the deposit rules of six markets:
 
