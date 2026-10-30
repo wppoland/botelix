@@ -72,12 +72,10 @@ final class SettingsPage implements HasHooks
                 $sanitized[$noticeKey] = sanitize_text_field((string) $input[$noticeKey]);
             }
 
-            if (isset($scheme['types']) && is_array($scheme['types'])) {
-                foreach (array_keys($scheme['types']) as $typeKey) {
-                    $amountKey = 'amount_' . $schemeId . '_' . $typeKey;
-                    if (isset($input[$amountKey]) && $input[$amountKey] !== '') {
-                        $sanitized[$amountKey] = max(0.0, (float) $input[$amountKey]);
-                    }
+            foreach (array_keys(array_filter((array) $scheme['rates'])) as $category) {
+                $amountKey = 'amount_' . $schemeId . '_' . $category;
+                if (isset($input[$amountKey]) && $input[$amountKey] !== '') {
+                    $sanitized[$amountKey] = max(0.0, (float) $input[$amountKey]);
                 }
             }
         }
@@ -207,18 +205,19 @@ final class SettingsPage implements HasHooks
                                         ?></p>
                                     </td>
                                 </tr>
-                                <?php if (! empty($scheme['types']) && is_array($scheme['types'])) : ?>
+                                <?php $rates = array_filter((array) $scheme['rates']); ?>
+                                <?php if ($rates !== []) : ?>
                                     <tr>
                                         <th scope="row"><?php echo esc_html__('Statutory Rates', 'botelix'); ?></th>
                                         <td>
-                                            <?php foreach ($scheme['types'] as $typeKey => $typeData) :
-                                                $amountVal = $settings['amount_' . $schemeId . '_' . $typeKey] ?? $typeData['amount'];
+                                            <?php foreach ($rates as $category => $rate) :
+                                                $amountVal = $settings['amount_' . $schemeId . '_' . $category] ?? $rate['amount'];
                                                 ?>
                                                 <div style="margin-bottom:8px;">
                                                     <label style="display:inline-block; min-width:320px;">
-                                                        <?php echo esc_html($typeData['label']); ?>:
+                                                        <?php echo esc_html($rate['label']); ?>:
                                                     </label>
-                                                    <input type="number" step="0.01" min="0" style="width:100px;" name="<?php echo esc_attr(DepositService::OPTION); ?>[amount_<?php echo esc_attr($schemeId . '_' . $typeKey); ?>]" value="<?php echo esc_attr((string) $amountVal); ?>" />
+                                                    <input type="number" step="0.01" min="0" style="width:100px;" name="<?php echo esc_attr(DepositService::OPTION); ?>[amount_<?php echo esc_attr($schemeId . '_' . $category); ?>]" value="<?php echo esc_attr((string) $amountVal); ?>" />
                                                     <span><?php echo esc_html($scheme['currency'] !== '' ? $scheme['currency'] : $this->depositService->storeCurrency()); ?></span>
                                                 </div>
                                             <?php endforeach; ?>

@@ -63,8 +63,8 @@ final class ProductMetaBox implements HasHooks
             'label' => __('Packaging container', 'botelix'),
             'description' => __('Select the container type. Each national scheme charges its own rate for it, or nothing where it is not covered.', 'botelix'),
             'desc_tip' => true,
-            'value' => $this->depositService->containerOptionValue($stored, $override),
-            'options' => $this->depositService->getPackagingTypeOptions($override, $stored),
+            'value' => $stored,
+            'options' => $this->depositService->getPackagingTypeOptions($override),
         ]);
 
         woocommerce_wp_text_input([
@@ -101,7 +101,7 @@ final class ProductMetaBox implements HasHooks
             ? sanitize_key(wp_unslash($_POST[DepositService::META_SCHEME]))
             : '';
         $type = isset($_POST[DepositService::META_TYPE])
-            ? sanitize_key(wp_unslash($_POST[DepositService::META_TYPE]))
+            ? $this->category(sanitize_key(wp_unslash($_POST[DepositService::META_TYPE])))
             : '';
         $units = isset($_POST[DepositService::META_UNITS])
             ? max(1, absint(wp_unslash($_POST[DepositService::META_UNITS])))
@@ -134,10 +134,10 @@ final class ProductMetaBox implements HasHooks
         woocommerce_wp_select([
             'id' => DepositService::META_TYPE . '[' . $loop . ']',
             'label' => __('Packaging container', 'botelix'),
-            'value' => $this->depositService->containerOptionValue($currentType, $override),
+            'value' => $currentType,
             'desc_tip' => true,
             'description' => __('Leave empty to inherit the parent packaging container setting.', 'botelix'),
-            'options' => $this->depositService->getPackagingTypeOptions($override, $currentType),
+            'options' => $this->depositService->getPackagingTypeOptions($override),
             'wrapper_class' => 'form-row form-row-first',
         ]);
 
@@ -185,7 +185,7 @@ final class ProductMetaBox implements HasHooks
 
         $type = '';
         if (isset($_POST[DepositService::META_TYPE][$i])) {
-            $type = sanitize_key(wp_unslash($_POST[DepositService::META_TYPE][$i]));
+            $type = $this->category(sanitize_key(wp_unslash($_POST[DepositService::META_TYPE][$i])));
         }
 
         $units = 1;
@@ -196,5 +196,13 @@ final class ProductMetaBox implements HasHooks
         $product->update_meta_data(DepositService::META_TYPE, $type);
         $product->update_meta_data(DepositService::META_UNITS, (string) $units);
         $product->save_meta_data();
+    }
+
+    /**
+     * A posted container value, kept only when it is one of the categories.
+     */
+    private function category(string $value): string
+    {
+        return isset(Scheme::containers()[$value]) ? $value : '';
     }
 }

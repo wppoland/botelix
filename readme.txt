@@ -16,19 +16,19 @@ National deposit return schemes (DRS) require retailers selling beverages in cov
 
 Botelix gives WooCommerce stores one lightweight tool for the deposit rules of six markets:
 
-* **Germany (Pfand)**: Section 46(1) VerpackDG sets a deposit of at least 0.25 EUR including VAT per single-use beverage container of 0.1 l to 3.0 l (Section 46(4) lists the exempt drinks). Reusable (Mehrweg) beer and water bottles have no statutory amount; Botelix offers the customary 0.08 EUR and 0.15 EUR as editable trade-practice rates.
+* **Germany (Pfand)**: Section 46(1) VerpackDG sets a deposit of at least 0.25 EUR including VAT per single-use beverage container of 0.1 l to 3.0 l (Section 46(4) lists the exempt drinks). Reusable (Mehrweg) glass bottles have no statutory amount; Botelix starts them at the customary 0.15 EUR, a trade-practice rate you can change in the settings.
 * **Austria (Einwegpfand)**: the Pfandverordnung fuer Einweggetraenkeverpackungen (BGBl. II Nr. 283/2023) Section 4 sets 0.25 EUR per single-use plastic bottle or metal can of 0.1 l to 3.0 l from 1 January 2025, milk drinks excepted. The regulation says nothing about VAT, so Botelix adds the deposit untaxed; a filter switches that if your tax adviser says otherwise.
 * **Poland (System kaucyjny)**: the Regulation of the Minister of Climate and Environment of 8 July 2024 (Dz.U. 2024 poz. 1046) Section 1 sets 0.50 PLN for single-use plastic bottles up to 3 l, 0.50 PLN for metal cans up to 1 l and 1.00 PLN for reusable glass bottles up to 1.5 l. Annex 1a to the packaging act (t.j. Dz.U. 2026 poz. 619) lists these packaging types; single-use glass is not covered. Under VAT Act Article 29a(11a) the deposit is not part of the tax base.
 * **Romania (SGR)**: HG nr. 1074/2021 (republished in M.Of. nr. 1120/2022, as amended) Article 12(5) sets a guarantee of 0.50 RON for every single-use glass, plastic or metal container of 0.1 l to 3 l holding a drink listed in Annex 1, mandatory since 30 November 2023 (Article 10(1)). Under Codul fiscal Article 315^5(2) the guarantee is outside the scope of VAT.
 * **Slovakia (Zalohovy system)**: Vyhlaska c. 347/2019 Z. z. Section 2 sets minimums of 0.12 EUR per plastic bottle and 0.10 EUR per metal can; the scheme administrator sets the actual rate (Zakon c. 302/2019 Z. z. Section 7(1)(g)). Botelix ships the minimums; enter the administrator's current rate in the settings. Under Zakon c. 222/2004 Z. z. Section 22(3) the deposit is not part of the VAT base.
 * **Hungary (DRS)**: 450/2023. (X. 4.) Korm. rendelet Section 3(1) sets a 50 HUF redemption fee per single-use plastic, metal or glass beverage container of 0.1 l to 3 l, from 1 January 2024. The producer sets the fee for reusable containers, so that rate starts at 0 for you to fill in. Botelix adds the fee untaxed.
-* **Custom Scheme**: one container rate in your store currency for any other deposit scheme, added untaxed.
+* **Custom Scheme**: a rate per container category (0.25 by default) in your store currency for any other deposit scheme, added untaxed.
 
 Key capabilities:
 
 * **Automatic Cart Fee**: Adds the deposit as a dedicated fee at cart and checkout using native WooCommerce fees.
 * **Tax Base Handling**: Where the law states the deposit including VAT (Germany), Botelix adds the net share per tax class, so the customer pays exactly the statutory amount with VAT. Everywhere else the deposit is added untaxed.
-* **One Container Type, Every Scheme**: Tag a product once as single-use plastic bottle, metal can, single-use glass bottle or reusable glass bottle; each national scheme charges its own rate for it, or nothing where it is not covered.
+* **One Container Category, Every Scheme**: Tag a product once as single-use plastic bottle, metal can, single-use glass bottle or reusable glass bottle. Each scheme sets its own rate for each category, or does not cover it and charges nothing; the product editor marks the categories the product's scheme does not cover.
 * **Multi-Pack Multiplier**: Multiplies deposit by container count (a 6-pack of cans automatically charges 6 container deposits).
 * **Cross-Border Destination Matching**: Optionally applies the scheme of the customer's shipping country. A scheme is only charged when its currency matches the store currency, because the rates are set in law in that currency and Botelix does not convert; the settings screen lists every scheme your store cannot charge.
 * **Export Exemption**: Option to exclude container deposits when shipping outside covered deposit jurisdictions.
@@ -89,9 +89,9 @@ Yes. Botelix uses the native WooCommerce cart fees API and declares full compati
 * Fixed: the German Pfand was charged with VAT on top; the customer now pays exactly the statutory amount including VAT.
 * Fixed: cross-border matching charged nothing for a product shipped to another scheme, and charged rates in the wrong currency.
 * Fixed: the deposit notice was missing on block single-product templates.
-* Changed: products are tagged with a container type that every scheme maps to its own rate; existing products keep working.
-* Changed: a product saved before 1.1.0 with a type that covered several materials (such as the German Einweg) keeps its own scheme's rate, is charged nothing where the material decides the rate, and shows as the current legacy setting in the editor until you pick a container.
-* Fixed: the product editor listed the store default scheme's containers instead of the product's scheme override, so saving a German Mehrweg product could drop its deposit; variations now follow the parent's override as well.
+* Changed: a product carries one container category (single-use plastic bottle, metal can, single-use glass bottle, reusable glass bottle); each scheme sets its rate for every category or does not cover it, and the settings list a rate field for each covered category.
+* Changed: the product editor offers the four categories and marks the ones the product's scheme (its override, else the store default) does not cover; variations follow the parent's override.
+* Changed: the German reusable glass rate starts at the customary 0.15 EUR, a trade-practice rate, not a statutory one.
 * Changed: a scheme is only charged when its currency equals the store currency; the settings screen lists the schemes that cannot be charged.
 * Changed: Austria is added without VAT and its notice no longer says "inkl. USt.", as the regulation states no VAT.
 * Changed: Slovakia uses the statutory minimums, 0.12 EUR for plastic bottles and 0.10 EUR for cans; the administrator's rate goes in the settings.

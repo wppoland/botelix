@@ -119,29 +119,29 @@ echo "  ok  SchemeResolver handles all 6 countries and export exemption\n";
 // 2. Test Scheme Statutory Data & Taxability
 $pl = \Botelix\Model\Scheme::get('pl');
 assert($pl['taxable'] === false, 'Poland deposit is non-taxable (outside VAT base)');
-assert($pl['types']['pet']['amount'] === 0.50, 'Poland PET deposit is 0.50 PLN');
-assert($pl['types']['glass_reusable']['amount'] === 1.00, 'Poland reusable glass is 1.00 PLN');
+assert($pl['rates']['plastic']['amount'] === 0.50, 'Poland plastic bottle deposit is 0.50 PLN');
+assert($pl['rates']['glass_reusable']['amount'] === 1.00, 'Poland reusable glass is 1.00 PLN');
 
 $ro = \Botelix\Model\Scheme::get('ro');
 assert($ro['taxable'] === false, 'Romania SGR is non-taxable');
-assert($ro['types']['sgr_single_use']['amount'] === 0.50, 'Romania SGR is 0.50 RON');
+assert($ro['rates']['glass']['amount'] === 0.50, 'Romania SGR is 0.50 RON');
 
 $at = \Botelix\Model\Scheme::get('at');
 assert($at['taxable'] === false, 'Austria: the regulation states no VAT; untaxed unless the botelix_scheme_taxable filter says otherwise');
-assert($at['types']['einweg']['amount'] === 0.25, 'Austria Einwegpfand is 0.25 EUR');
+assert($at['rates']['can']['amount'] === 0.25, 'Austria Einwegpfand is 0.25 EUR');
 
 $de = \Botelix\Model\Scheme::get('de');
 assert($de['taxable'] === true, 'Germany Pfand is stated including VAT');
-assert($de['types']['einweg']['amount'] === 0.25, 'Germany Einwegpfand is 0.25 EUR');
+assert($de['rates']['glass']['amount'] === 0.25, 'Germany Einwegpfand is 0.25 EUR');
 
 $sk = \Botelix\Model\Scheme::get('sk');
 assert($sk['taxable'] === false, 'Slovakia Zaloh is non-taxable');
-assert($sk['types']['zaloh_single_use']['amount'] === 0.12, 'Slovakia plastic minimum is 0.12 EUR');
-assert($sk['types']['zaloh_can']['amount'] === 0.10, 'Slovakia can minimum is 0.10 EUR');
+assert($sk['rates']['plastic']['amount'] === 0.12, 'Slovakia plastic minimum is 0.12 EUR');
+assert($sk['rates']['can']['amount'] === 0.10, 'Slovakia can minimum is 0.10 EUR');
 
 $hu = \Botelix\Model\Scheme::get('hu');
 assert($hu['taxable'] === false, 'Hungary DRS is non-taxable');
-assert($hu['types']['drs_single_use']['amount'] === 50.0, 'Hungary DRS is 50 HUF');
+assert($hu['rates']['plastic']['amount'] === 50.0, 'Hungary DRS is 50 HUF');
 
 echo "  ok  Scheme model verifies statutory amounts and VAT taxability flags\n";
 
@@ -156,7 +156,7 @@ $depositService = new \Botelix\Service\DepositService();
 
 // Single bottle (PL PET = 0.50 PLN)
 $p1 = new WC_Product(1);
-$p1->set_meta(\Botelix\Service\DepositService::META_TYPE, 'pet');
+$p1->set_meta(\Botelix\Service\DepositService::META_TYPE, 'plastic');
 $p1->set_meta(\Botelix\Service\DepositService::META_UNITS, 1);
 $GLOBALS['products'][1] = $p1;
 
@@ -185,7 +185,7 @@ echo "  ok  Single and multipack deposit multipliers calculate correctly\n";
 
 // 4. Test Variation Parent Inheritance
 $parent = new WC_Product(10);
-$parent->set_meta(\Botelix\Service\DepositService::META_TYPE, 'pet');
+$parent->set_meta(\Botelix\Service\DepositService::META_TYPE, 'plastic');
 $parent->set_meta(\Botelix\Service\DepositService::META_UNITS, 1);
 $GLOBALS['products'][10] = $parent;
 
@@ -198,7 +198,7 @@ assert($varDeposit1 === 0.50, "Variation should inherit parent deposit (0.50), g
 
 // Child variation overrides to 4-pack
 $variation2 = new WC_Product(12, 10);
-$variation2->set_meta(\Botelix\Service\DepositService::META_TYPE, 'pet');
+$variation2->set_meta(\Botelix\Service\DepositService::META_TYPE, 'plastic');
 $variation2->set_meta(\Botelix\Service\DepositService::META_UNITS, 4);
 $GLOBALS['products'][12] = $variation2;
 
@@ -218,7 +218,7 @@ $deDeposit = $depositService->depositFor($deCan, 'de');
 assert($deDeposit === 0.25, "German can deposit must be 0.25 EUR");
 
 $roBottle = new WC_Product(30);
-$roBottle->set_meta(\Botelix\Service\DepositService::META_TYPE, 'sgr_single_use');
+$roBottle->set_meta(\Botelix\Service\DepositService::META_TYPE, 'plastic');
 $roBottle->set_meta(\Botelix\Service\DepositService::META_UNITS, 1);
 $GLOBALS['products'][30] = $roBottle;
 
@@ -227,7 +227,7 @@ $roDeposit = $depositService->depositFor($roBottle, 'ro');
 assert($roDeposit === 0.50, "Romanian SGR deposit must be 0.50 RON");
 
 $skBottle = new WC_Product(40);
-$skBottle->set_meta(\Botelix\Service\DepositService::META_TYPE, 'zaloh_single_use');
+$skBottle->set_meta(\Botelix\Service\DepositService::META_TYPE, 'plastic');
 $skBottle->set_meta(\Botelix\Service\DepositService::META_UNITS, 1);
 $GLOBALS['products'][40] = $skBottle;
 
@@ -236,7 +236,7 @@ $skDeposit = $depositService->depositFor($skBottle, 'sk');
 assert($skDeposit === 0.12, "Slovak plastic deposit must be the 0.12 EUR minimum");
 
 $huBottle = new WC_Product(50);
-$huBottle->set_meta(\Botelix\Service\DepositService::META_TYPE, 'drs_single_use');
+$huBottle->set_meta(\Botelix\Service\DepositService::META_TYPE, 'plastic');
 $huBottle->set_meta(\Botelix\Service\DepositService::META_UNITS, 1);
 $GLOBALS['products'][50] = $huBottle;
 

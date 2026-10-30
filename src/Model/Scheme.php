@@ -20,8 +20,8 @@ final class Scheme
     public const SCHEME_CUSTOM = 'custom';
 
     /**
-     * Neutral container categories a product is tagged with, mapped per scheme
-     * through each scheme's 'containers' entry.
+     * Neutral container categories. A product stores one of these keys; each
+     * scheme gives a rate for it in 'rates', or null where it is not covered.
      *
      * @return array<string, string>
      */
@@ -36,14 +36,18 @@ final class Scheme
     }
 
     /**
-     * Schemes, rates and VAT treatment as read in each act (see readme).
-     * 'containers' maps a neutral category to the scheme's type key; a category
-     * missing from the map is not covered by that scheme.
+     * Schemes, rates and VAT treatment as read in each act (see readme). 'rates'
+     * holds every container category: null when the scheme does not cover it,
+     * else the default amount in the scheme currency and its settings label.
      *
      * @return array<string, array<string, mixed>>
      */
     public static function all(): array
     {
+        $plastic = __('Single-use plastic bottle 0.1 l to 3 l', 'botelix');
+        $can     = __('Metal can 0.1 l to 3 l', 'botelix');
+        $glass   = __('Single-use glass bottle 0.1 l to 3 l', 'botelix');
+
         return [
             self::SCHEME_PL => [
                 'name' => __('Poland (System kaucyjny)', 'botelix'),
@@ -54,24 +58,12 @@ final class Scheme
                 'default_label' => __('Deposit (kaucja)', 'botelix'),
                 /* translators: %s: formatted deposit amount, e.g. 0,50 zl */
                 'default_notice' => __('Plus %s statutory deposit, refunded when you return the packaging.', 'botelix'),
-                'containers' => [
-                    'plastic' => 'pet',
-                    'can' => 'can',
-                    'glass_reusable' => 'glass_reusable',
-                ],
-                'types' => [
-                    'pet' => [
-                        'label' => __('Single-use plastic bottle up to 3 l', 'botelix'),
-                        'amount' => 0.50,
-                    ],
-                    'can' => [
-                        'label' => __('Metal beverage can up to 1 l', 'botelix'),
-                        'amount' => 0.50,
-                    ],
-                    'glass_reusable' => [
-                        'label' => __('Reusable glass bottle up to 1.5 l', 'botelix'),
-                        'amount' => 1.00,
-                    ],
+                // Annex 1a to the packaging act: single-use glass is not covered.
+                'rates' => [
+                    'plastic' => ['amount' => 0.50, 'label' => __('Single-use plastic bottle up to 3 l', 'botelix')],
+                    'can' => ['amount' => 0.50, 'label' => __('Metal beverage can up to 1 l', 'botelix')],
+                    'glass' => null,
+                    'glass_reusable' => ['amount' => 1.00, 'label' => __('Reusable glass bottle up to 1.5 l', 'botelix')],
                 ],
             ],
             self::SCHEME_RO => [
@@ -83,16 +75,12 @@ final class Scheme
                 'default_label' => __('Garanție SGR', 'botelix'),
                 /* translators: %s: formatted deposit amount, e.g. 0,50 lei */
                 'default_notice' => __('Plus garanție SGR %s, returnabilă la predarea ambalajului.', 'botelix'),
-                'containers' => [
-                    'plastic' => 'sgr_single_use',
-                    'can' => 'sgr_single_use',
-                    'glass' => 'sgr_single_use',
-                ],
-                'types' => [
-                    'sgr_single_use' => [
-                        'label' => __('Single-use primary packaging 0.1 l to 3 l (glass, plastic, metal)', 'botelix'),
-                        'amount' => 0.50,
-                    ],
+                // Art. 12(5): single-use glass, plastic and metal; reusable not covered here.
+                'rates' => [
+                    'plastic' => ['amount' => 0.50, 'label' => $plastic],
+                    'can' => ['amount' => 0.50, 'label' => $can],
+                    'glass' => ['amount' => 0.50, 'label' => $glass],
+                    'glass_reusable' => null,
                 ],
             ],
             self::SCHEME_AT => [
@@ -107,15 +95,12 @@ final class Scheme
                 'default_label' => __('Einwegpfand', 'botelix'),
                 /* translators: %s: formatted deposit amount, e.g. 0,25 EUR */
                 'default_notice' => __('Zzgl. %s Einwegpfand, wird bei Rückgabe erstattet.', 'botelix'),
-                'containers' => [
-                    'plastic' => 'einweg',
-                    'can' => 'einweg',
-                ],
-                'types' => [
-                    'einweg' => [
-                        'label' => __('Single-use plastic bottle or metal can 0.1 l to 3 l', 'botelix'),
-                        'amount' => 0.25,
-                    ],
+                // s. 4: single-use plastic bottles and metal cans only.
+                'rates' => [
+                    'plastic' => ['amount' => 0.25, 'label' => $plastic],
+                    'can' => ['amount' => 0.25, 'label' => $can],
+                    'glass' => null,
+                    'glass_reusable' => null,
                 ],
             ],
             self::SCHEME_DE => [
@@ -127,30 +112,14 @@ final class Scheme
                 'default_label' => __('Pfand', 'botelix'),
                 /* translators: %s: formatted deposit amount, e.g. 0,25 EUR */
                 'default_notice' => __('Zzgl. %s Pfand, wird bei Rückgabe erstattet.', 'botelix'),
-                // ponytail: reusable glass has no statutory amount, so the category is
-                // unmapped; beer and water Mehrweg stay selectable as DE-only types.
-                'containers' => [
-                    'plastic' => 'einweg',
-                    'glass' => 'einweg',
-                    'can' => 'can',
-                ],
-                'types' => [
-                    'einweg' => [
-                        'label' => __('Single-use container / Einwegpfand (statutory minimum)', 'botelix'),
-                        'amount' => 0.25,
-                    ],
-                    'can' => [
-                        'label' => __('Beverage can / Dose (statutory minimum)', 'botelix'),
-                        'amount' => 0.25,
-                    ],
-                    'mehrweg_bier' => [
-                        'label' => __('Reusable beer bottle / Mehrweg Bier (trade practice, not statutory)', 'botelix'),
-                        'amount' => 0.08,
-                    ],
-                    'mehrweg_mineral' => [
-                        'label' => __('Reusable mineral water / Mehrweg Mineralwasser (trade practice, not statutory)', 'botelix'),
-                        'amount' => 0.15,
-                    ],
+                // s. 46(1) covers every single-use material. Reusable glass has no
+                // statutory amount: 0.15 EUR is the customary Mehrweg water bottle
+                // rate (beer is usually 0.08), editable in the settings.
+                'rates' => [
+                    'plastic' => ['amount' => 0.25, 'label' => __('Single-use plastic bottle (statutory minimum)', 'botelix')],
+                    'can' => ['amount' => 0.25, 'label' => __('Beverage can / Dose (statutory minimum)', 'botelix')],
+                    'glass' => ['amount' => 0.25, 'label' => __('Single-use glass bottle (statutory minimum)', 'botelix')],
+                    'glass_reusable' => ['amount' => 0.15, 'label' => __('Reusable glass bottle / Mehrweg (trade practice, not statutory)', 'botelix')],
                 ],
             ],
             self::SCHEME_SK => [
@@ -162,20 +131,13 @@ final class Scheme
                 'default_label' => __('Záloh', 'botelix'),
                 /* translators: %s: formatted deposit amount, e.g. 0,15 EUR */
                 'default_notice' => __('Plus %s záloh za obal, vratný pri odovzdaní obalu.', 'botelix'),
-                'containers' => [
-                    'plastic' => 'zaloh_single_use',
-                    'can' => 'zaloh_can',
-                ],
-                // Vyhlaska 347/2019 s. 2 sets minimums; the administrator sets the rate.
-                'types' => [
-                    'zaloh_single_use' => [
-                        'label' => __('Single-use plastic bottle 0.1 l to 3 l (statutory minimum, the administrator sets the rate)', 'botelix'),
-                        'amount' => 0.12,
-                    ],
-                    'zaloh_can' => [
-                        'label' => __('Metal can 0.1 l to 3 l (statutory minimum, the administrator sets the rate)', 'botelix'),
-                        'amount' => 0.10,
-                    ],
+                // Vyhlaska 347/2019 s. 2 sets minimums for plastic and cans only; the
+                // administrator sets the rate.
+                'rates' => [
+                    'plastic' => ['amount' => 0.12, 'label' => __('Single-use plastic bottle 0.1 l to 3 l (statutory minimum, the administrator sets the rate)', 'botelix')],
+                    'can' => ['amount' => 0.10, 'label' => __('Metal can 0.1 l to 3 l (statutory minimum, the administrator sets the rate)', 'botelix')],
+                    'glass' => null,
+                    'glass_reusable' => null,
                 ],
             ],
             self::SCHEME_HU => [
@@ -186,22 +148,13 @@ final class Scheme
                 'default_label' => __('Visszaváltási díj', 'botelix'),
                 /* translators: %s: formatted deposit amount, e.g. 50 Ft */
                 'default_notice' => __('Plusz %s visszaváltási díj, visszaváltáskor visszajár.', 'botelix'),
-                'containers' => [
-                    'plastic' => 'drs_single_use',
-                    'can' => 'drs_single_use',
-                    'glass' => 'drs_single_use',
-                    'glass_reusable' => 'drs_reusable',
-                ],
-                'types' => [
-                    'drs_single_use' => [
-                        'label' => __('Single-use beverage container 0.1 l to 3 l (metal, plastic, glass)', 'botelix'),
-                        'amount' => 50.0,
-                    ],
-                    // 3. s. (1): the producer sets the reusable fee; there is no default.
-                    'drs_reusable' => [
-                        'label' => __('Reusable container (fee set by the producer, enter it here)', 'botelix'),
-                        'amount' => 0.0,
-                    ],
+                // 3. s. (1): 50 HUF for single-use metal, plastic and glass; the
+                // producer sets the reusable fee, so it starts at 0.
+                'rates' => [
+                    'plastic' => ['amount' => 50.0, 'label' => $plastic],
+                    'can' => ['amount' => 50.0, 'label' => $can],
+                    'glass' => ['amount' => 50.0, 'label' => $glass],
+                    'glass_reusable' => ['amount' => 0.0, 'label' => __('Reusable glass bottle (fee set by the producer, enter it here)', 'botelix')],
                 ],
             ],
             self::SCHEME_CUSTOM => [
@@ -212,18 +165,10 @@ final class Scheme
                 'default_label' => __('Deposit', 'botelix'),
                 /* translators: %s: formatted deposit amount */
                 'default_notice' => __('Plus %s deposit, refunded upon return.', 'botelix'),
-                'containers' => [
-                    'plastic' => 'custom_1',
-                    'can' => 'custom_1',
-                    'glass' => 'custom_1',
-                    'glass_reusable' => 'custom_1',
-                ],
-                'types' => [
-                    'custom_1' => [
-                        'label' => __('Standard container deposit', 'botelix'),
-                        'amount' => 0.25,
-                    ],
-                ],
+                'rates' => array_map(
+                    static fn (string $label): array => ['amount' => 0.25, 'label' => $label],
+                    self::containers()
+                ),
             ],
         ];
     }

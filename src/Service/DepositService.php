@@ -30,24 +30,6 @@ final class DepositService implements HasHooks
         'exempt_unsupported_exports' => '1',
     ];
 
-    /**
-     * Scheme-specific type keys saved before 1.1.0, with every container category
-     * the old type covered. Another scheme charges one only when all of them map
-     * to the same type there, so no material is guessed. drs_reusable is left
-     * out: the old HU type did not say what the container is made of.
-     */
-    private const LEGACY_CONTAINERS = [
-        'pet' => ['plastic'],
-        // DE einweg covered every single-use material, AT einweg plastic and cans.
-        'einweg' => ['plastic', 'glass', 'can'],
-        'sgr_single_use' => ['plastic', 'glass', 'can'],
-        'zaloh_single_use' => ['plastic', 'can'],
-        'drs_single_use' => ['plastic', 'glass', 'can'],
-        'custom_1' => ['plastic', 'glass', 'can', 'glass_reusable'],
-        'mehrweg_bier' => ['glass_reusable'],
-        'mehrweg_mineral' => ['glass_reusable'],
-    ];
-
     private SchemeResolver $resolver;
 
     /**
@@ -88,93 +70,25 @@ final class DepositService implements HasHooks
     }
 
     /**
-     * Container options for the product editor under a scheme (the product's
-     * override, else the store default): the neutral categories plus the scheme's
-     * own types that no category maps to (e.g. DE Mehrweg). A stored value the
-     * editor cannot preselect stays listed as the current legacy setting, so a
-     * plain save keeps it.
+     * Container options for the product editor. Every category is offered; the
+     * ones the given scheme (the product's override, else the store default)
+     * does not cover say so.
      *
      * @return array<string, string>
      */
-    public function getPackagingTypeOptions(?string $schemeId = null, string $stored = ''): array
+    public function getPackagingTypeOptions(?string $schemeId = null): array
     {
         $scheme  = Scheme::get($schemeId ?: (string) $this->settings['default_scheme']);
-        $options = ['' => __('None (not covered by deposit scheme)', 'botelix')] + Scheme::containers();
+        $options = ['' => __('None (not covered by deposit scheme)', 'botelix')];
 
-        if ($scheme !== null) {
-            $mapped = array_values((array) ($scheme['containers'] ?? []));
-            foreach ((array) $scheme['types'] as $key => $typeData) {
-                if (! in_array($key, $mapped, true)) {
-                    $options[$key] = (string) ($typeData['label'] ?? $key);
-                }
-            }
-        }
-
-        if ($stored !== '' && ! isset($options[$stored]) && $this->containerOptionValue($stored, $schemeId) === $stored) {
-            $label = $stored;
-            foreach ([$scheme] + Scheme::all() as $candidate) {
-                if (isset($candidate['types'][$stored]['label'])) {
-                    $label = (string) $candidate['types'][$stored]['label'];
-                    break;
-                }
-            }
-            /* translators: %s: container type label saved before Botelix 1.1.0 */
-            $options[$stored] = sprintf(__('Current setting (legacy): %s', 'botelix'), $label);
+        foreach (Scheme::containers() as $category => $label) {
+            $options[$category] = $scheme === null || isset($scheme['rates'][$category])
+                ? $label
+                /* translators: 1: container category, 2: scheme name */
+                : sprintf(__('%1$s - not covered by %2$s', 'botelix'), $label, (string) $scheme['name']);
         }
 
         return $options;
-    }
-
-    /**
-     * Value to preselect for a stored container meta. A pre-1.1.0 key becomes its
-     * category only when that charges the same under every scheme; otherwise the
-     * key itself stays selected.
-     */
-    public function containerOptionValue(string $stored, ?string $schemeId = null): string
-    {
-        $categories = self::LEGACY_CONTAINERS[$stored] ?? [];
-
-        if (count($categories) !== 1 || isset($this->getPackagingTypeOptions($schemeId)[$stored])) {
-            return $stored;
-        }
-
-        foreach (array_keys(Scheme::all()) as $id) {
-            if ($this->typeKeyFor($categories[0], $id) !== $this->typeKeyFor($stored, $id)) {
-                return $stored;
-            }
-        }
-
-        return $categories[0];
-    }
-
-    /**
-     * The scheme type key a stored container value means under a scheme, or null
-     * when that scheme does not cover it.
-     */
-    public function typeKeyFor(string $stored, string $schemeId): ?string
-    {
-        $scheme = Scheme::get($schemeId);
-        if ($scheme === null || $stored === '') {
-            return null;
-        }
-
-        $map = (array) ($scheme['containers'] ?? []);
-
-        if (isset($map[$stored])) {
-            return (string) $map[$stored];
-        }
-
-        if (isset($scheme['types'][$stored])) {
-            return $stored;
-        }
-
-        $types = [];
-        foreach (self::LEGACY_CONTAINERS[$stored] ?? [] as $category) {
-            $types[] = isset($map[$category]) ? (string) $map[$category] : null;
-        }
-        $types = array_unique($types, SORT_REGULAR);
-
-        return count($types) === 1 ? $types[0] : null;
     }
 
     /**
@@ -239,27 +153,28 @@ final class DepositService implements HasHooks
     }
 
     /**
-     * Amount for a scheme type key under a scheme, merchant override first.
+     * Amount for a container category under a scheme, merchant override first;
+     * 0 where the scheme does not cover the category.
      */
-    public function amountForType(string $type, ?string $schemeId = null): float
+    public function amountFor(string $category, ?string $schemeId = null): float
     {
         $schemeId = $schemeId ?: $this->resolver->resolveScheme();
         if ($schemeId === null) {
             return 0.0;
         }
 
-        $scheme = Scheme::get($schemeId);
-        if ($scheme === null || ! isset($scheme['types'][$type])) {
+        $rate = Scheme::get($schemeId)['rates'][$category] ?? null;
+        if ($rate === null) {
             return 0.0;
         }
 
-        $configured = $this->settings['amount_' . $schemeId . '_' . $type] ?? null;
+        $configured = $this->settings['amount_' . $schemeId . '_' . $category] ?? null;
 
         if ($configured !== null && $configured !== '') {
             return max(0.0, (float) $configured);
         }
 
-        return (float) ($scheme['types'][$type]['amount'] ?? 0.0);
+        return (float) $rate['amount'];
     }
 
     /**
@@ -294,21 +209,16 @@ final class DepositService implements HasHooks
             }
         }
 
-        $stored   = (string) $source->get_meta(self::META_TYPE, true);
+        $category = (string) $source->get_meta(self::META_TYPE, true);
         $units    = $source->get_meta(self::META_UNITS, true);
         $override = $this->schemeOverride($source);
         $active   = $override !== '' ? $override : $resolved;
 
-        if ($stored === '' || ! $this->isChargeable($active)) {
+        if ($category === '' || ! $this->isChargeable($active)) {
             return [$active, 0.0];
         }
 
-        $type = $this->typeKeyFor($stored, $active);
-        if ($type === null) {
-            return [$active, 0.0];
-        }
-
-        return [$active, $this->amountForType($type, $active) * max(1, (int) $units)];
+        return [$active, $this->amountFor($category, $active) * max(1, (int) $units)];
     }
 
     /**

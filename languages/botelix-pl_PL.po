@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, "
 "Zaloh) 1.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/botelix\n"
-"POT-Creation-Date: 2026-10-30T14:06:45+00:00\n"
+"POT-Creation-Date: 2026-10-30T14:26:36+00:00\n"
 "PO-Revision-Date: 2026-10-30 12:00+0000\n"
 "Last-Translator: WPPoland.com\n"
 "Language-Team: Polish\n"
@@ -116,11 +116,11 @@ msgstr "Botelix - system kaucyjny"
 msgid "Deposit Return (DRS)"
 msgstr "System kaucyjny (DRS)"
 
-#: src/Admin/SettingsPage.php:98
+#: src/Admin/SettingsPage.php:96
 msgid "Botelix - Multi-Country Deposit Return Scheme (DRS)"
 msgstr "Botelix - wielokrajowy system kaucyjny (DRS)"
 
-#: src/Admin/SettingsPage.php:100
+#: src/Admin/SettingsPage.php:98
 msgid ""
 "Configure statutory container deposit schemes for European ecommerce (Pfand, "
 "SGR, Kaucja, Záloh, Visszaváltási díj)."
@@ -129,7 +129,7 @@ msgstr ""
 "SGR, Kaucja, Záloh, Visszaváltási díj)."
 
 #. translators: %s: store currency code, e.g. PLN
-#: src/Admin/SettingsPage.php:111
+#: src/Admin/SettingsPage.php:109
 #, php-format
 msgid ""
 "These schemes charge nothing in this store. Their rates are set in law in "
@@ -141,24 +141,24 @@ msgstr ""
 "walut:"
 
 #. translators: 1: scheme name, 2: scheme currency code, e.g. EUR
-#: src/Admin/SettingsPage.php:120
+#: src/Admin/SettingsPage.php:118
 #, php-format
 msgid "%1$s (rates in %2$s)"
 msgstr "%1$s (stawki w %2$s)"
 
-#: src/Admin/SettingsPage.php:136
+#: src/Admin/SettingsPage.php:134
 msgid "Enable Deposit Scheme"
 msgstr "Włącz system kaucyjny"
 
-#: src/Admin/SettingsPage.php:140
+#: src/Admin/SettingsPage.php:138
 msgid "Activate container deposit calculation and notices"
 msgstr "Włącz naliczanie kaucji za opakowania i komunikaty"
 
-#: src/Admin/SettingsPage.php:145
+#: src/Admin/SettingsPage.php:143
 msgid "Default Scheme"
 msgstr "Domyślny system"
 
-#: src/Admin/SettingsPage.php:154
+#: src/Admin/SettingsPage.php:152
 msgid ""
 "Default statutory scheme applied when destination matching is off or country "
 "is domestic."
@@ -166,11 +166,11 @@ msgstr ""
 "Domyślny system ustawowy, stosowany, gdy dopasowanie do kraju docelowego "
 "jest wyłączone albo dostawa jest krajowa."
 
-#: src/Admin/SettingsPage.php:158
+#: src/Admin/SettingsPage.php:156
 msgid "Cross-Border Destination Matching"
 msgstr "Dopasowanie do kraju docelowego"
 
-#: src/Admin/SettingsPage.php:162
+#: src/Admin/SettingsPage.php:160
 msgid ""
 "Automatically apply the destination country scheme (PL, RO, AT, DE, SK, HU) "
 "based on shipping address"
@@ -178,55 +178,57 @@ msgstr ""
 "Automatycznie stosuj system kraju docelowego (PL, RO, AT, DE, SK, HU) na "
 "podstawie adresu wysyłki"
 
-#: src/Admin/SettingsPage.php:167
+#: src/Admin/SettingsPage.php:165
 msgid "Export Exemption"
 msgstr "Zwolnienie przy wysyłce za granicę"
 
-#: src/Admin/SettingsPage.php:171
+#: src/Admin/SettingsPage.php:169
 msgid ""
 "Do not charge container deposits when shipping outside covered deposit "
 "jurisdictions"
 msgstr "Nie pobieraj kaucji przy wysyłce poza kraje objęte systemem kaucyjnym"
 
-#: src/Admin/SettingsPage.php:177
+#: src/Admin/SettingsPage.php:175
 msgid "Statutory Schemes & Default Amounts"
 msgstr "Systemy ustawowe i domyślne kwoty"
 
-#: src/Admin/SettingsPage.php:182
+#: src/Admin/SettingsPage.php:180
 msgid "Legal basis:"
 msgstr "Podstawa prawna:"
 
-#: src/Admin/SettingsPage.php:183
+#: src/Admin/SettingsPage.php:181
 msgid "Tax status:"
 msgstr "Status podatkowy:"
 
-#: src/Admin/SettingsPage.php:185
+#: src/Admin/SettingsPage.php:183
 msgid ""
 "Amount includes VAT: the fee is the net share and WooCommerce adds the tax "
 "back"
 msgstr ""
 "Kwota zawiera VAT: opłata to część netto, a WooCommerce dolicza podatek"
 
-#: src/Admin/SettingsPage.php:187
+#: src/Admin/SettingsPage.php:185
 msgid ""
 "Amount includes VAT, but WooCommerce taxes are off, so the full amount is "
 "added without tax"
 msgstr ""
+"Kwota zawiera VAT, ale podatki WooCommerce są wyłączone, więc cała kwota "
+"jest doliczana bez podatku"
 
-#: src/Admin/SettingsPage.php:189
+#: src/Admin/SettingsPage.php:187
 msgid "Non-taxable fee (outside VAT base)"
 msgstr "Opłata nieopodatkowana (poza podstawą VAT)"
 
-#: src/Admin/SettingsPage.php:195
+#: src/Admin/SettingsPage.php:193
 msgid "Fee Label"
 msgstr "Nazwa opłaty"
 
-#: src/Admin/SettingsPage.php:201
+#: src/Admin/SettingsPage.php:199
 msgid "Product Notice Template"
 msgstr "Szablon komunikatu na stronie produktu"
 
 #. translators: %s is shown literally: a placeholder token merchants may type
-#: src/Admin/SettingsPage.php:206
+#: src/Admin/SettingsPage.php:204
 #, php-format
 msgid ""
 "Leave empty for the default text shown in the field. Use {amount} or %s "
@@ -235,7 +237,7 @@ msgstr ""
 "Zostaw puste, aby użyć domyślnego tekstu widocznego w polu. Użyj {amount} "
 "lub %s w miejscu sformatowanej kwoty kaucji."
 
-#: src/Admin/SettingsPage.php:212
+#: src/Admin/SettingsPage.php:211
 msgid "Statutory Rates"
 msgstr "Stawki ustawowe"
 
@@ -255,120 +257,119 @@ msgstr "Jednorazowa butelka szklana"
 msgid "Reusable glass bottle"
 msgstr "Szklana butelka wielokrotnego użytku"
 
+#: src/Model/Scheme.php:47
+msgid "Single-use plastic bottle 0.1 l to 3 l"
+msgstr "Jednorazowa butelka z tworzywa sztucznego od 0,1 l do 3 l"
+
+#: src/Model/Scheme.php:48
+msgid "Metal can 0.1 l to 3 l"
+msgstr "Puszka metalowa od 0,1 l do 3 l"
+
 #: src/Model/Scheme.php:49
+msgid "Single-use glass bottle 0.1 l to 3 l"
+msgstr "Jednorazowa butelka szklana od 0,1 l do 3 l"
+
+#: src/Model/Scheme.php:53
 msgid "Poland (System kaucyjny)"
 msgstr "Polska (system kaucyjny)"
 
-#: src/Model/Scheme.php:54
+#: src/Model/Scheme.php:58
 msgid "Deposit (kaucja)"
 msgstr "Kaucja"
 
 #. translators: %s: formatted deposit amount, e.g. 0,50 zl
-#: src/Model/Scheme.php:56
+#: src/Model/Scheme.php:60
 #, php-format
 msgid "Plus %s statutory deposit, refunded when you return the packaging."
 msgstr "Dodatkowo kaucja %s, zwracana po oddaniu opakowania."
 
-#: src/Model/Scheme.php:64
+#: src/Model/Scheme.php:63
 msgid "Single-use plastic bottle up to 3 l"
 msgstr "Jednorazowa butelka z tworzywa sztucznego do 3 l"
 
-#: src/Model/Scheme.php:68
+#: src/Model/Scheme.php:64
 msgid "Metal beverage can up to 1 l"
 msgstr "Metalowa puszka na napoje do 1 l"
 
-#: src/Model/Scheme.php:72
+#: src/Model/Scheme.php:66
 msgid "Reusable glass bottle up to 1.5 l"
 msgstr "Szklana butelka wielokrotnego użytku do 1,5 l"
 
-#: src/Model/Scheme.php:78
+#: src/Model/Scheme.php:70
 msgid "Romania (SGR - Sistemul de garanție-returnare)"
 msgstr "Rumunia (SGR - Sistemul de garanție-returnare)"
 
-#: src/Model/Scheme.php:83
+#: src/Model/Scheme.php:75
 msgid "Garanție SGR"
 msgstr "Garanție SGR"
 
 #. translators: %s: formatted deposit amount, e.g. 0,50 lei
-#: src/Model/Scheme.php:85
+#: src/Model/Scheme.php:77
 #, php-format
 msgid "Plus garanție SGR %s, returnabilă la predarea ambalajului."
 msgstr "Plus garanție SGR %s, returnabilă la predarea ambalajului."
 
-#: src/Model/Scheme.php:93
-msgid "Single-use primary packaging 0.1 l to 3 l (glass, plastic, metal)"
-msgstr ""
-"Jednorazowe opakowanie podstawowe od 0,1 l do 3 l (szkło, plastik, metal)"
-
-#: src/Model/Scheme.php:99
+#: src/Model/Scheme.php:87
 msgid "Austria (Einwegpfand)"
 msgstr "Austria (Einwegpfand)"
 
-#: src/Model/Scheme.php:107
+#: src/Model/Scheme.php:95
 msgid "Einwegpfand"
 msgstr "Einwegpfand"
 
 #. translators: %s: formatted deposit amount, e.g. 0,25 EUR
-#: src/Model/Scheme.php:109
+#: src/Model/Scheme.php:97
 #, php-format
 msgid "Zzgl. %s Einwegpfand, wird bei Rückgabe erstattet."
 msgstr "Zzgl. %s Einwegpfand, wird bei Rückgabe erstattet."
 
-#: src/Model/Scheme.php:116
-msgid "Single-use plastic bottle or metal can 0.1 l to 3 l"
-msgstr "Jednorazowa butelka plastikowa lub puszka metalowa od 0,1 l do 3 l"
-
-#: src/Model/Scheme.php:122
+#: src/Model/Scheme.php:107
 msgid "Germany (Pfand / DPG)"
 msgstr "Niemcy (Pfand / DPG)"
 
-#: src/Model/Scheme.php:127
+#: src/Model/Scheme.php:112
 msgid "Pfand"
 msgstr "Pfand"
 
 #. translators: %s: formatted deposit amount, e.g. 0,25 EUR
-#: src/Model/Scheme.php:129
+#: src/Model/Scheme.php:114
 #, php-format
 msgid "Zzgl. %s Pfand, wird bei Rückgabe erstattet."
 msgstr "Zzgl. %s Pfand, wird bei Rückgabe erstattet."
 
-#: src/Model/Scheme.php:139
-msgid "Single-use container / Einwegpfand (statutory minimum)"
-msgstr "Opakowanie jednorazowe / Einwegpfand (minimum ustawowe)"
+#: src/Model/Scheme.php:119
+msgid "Single-use plastic bottle (statutory minimum)"
+msgstr "Jednorazowa butelka z tworzywa sztucznego (ustawowe minimum)"
 
-#: src/Model/Scheme.php:143
+#: src/Model/Scheme.php:120
 msgid "Beverage can / Dose (statutory minimum)"
 msgstr "Puszka na napoje / Dose (ustawowe minimum)"
 
-#: src/Model/Scheme.php:147
-msgid "Reusable beer bottle / Mehrweg Bier (trade practice, not statutory)"
+#: src/Model/Scheme.php:121
+msgid "Single-use glass bottle (statutory minimum)"
+msgstr "Jednorazowa butelka szklana (ustawowe minimum)"
+
+#: src/Model/Scheme.php:122
+msgid "Reusable glass bottle / Mehrweg (trade practice, not statutory)"
 msgstr ""
-"Butelka na piwo wielokrotnego użytku / Mehrweg Bier (praktyka handlowa, nie "
+"Szklana butelka wielokrotnego użytku / Mehrweg (praktyka handlowa, nie "
 "przepis)"
 
-#: src/Model/Scheme.php:151
-msgid ""
-"Reusable mineral water / Mehrweg Mineralwasser (trade practice, not "
-"statutory)"
-msgstr ""
-"Woda mineralna w butelce zwrotnej / Mehrweg Mineralwasser (praktyka "
-"handlowa, nie przepis)"
-
-#: src/Model/Scheme.php:157
+#: src/Model/Scheme.php:126
 msgid "Slovakia (Zálohový systém)"
 msgstr "Słowacja (Zálohový systém)"
 
-#: src/Model/Scheme.php:162
+#: src/Model/Scheme.php:131
 msgid "Záloh"
 msgstr "Záloh"
 
 #. translators: %s: formatted deposit amount, e.g. 0,15 EUR
-#: src/Model/Scheme.php:164
+#: src/Model/Scheme.php:133
 #, php-format
 msgid "Plus %s záloh za obal, vratný pri odovzdaní obalu."
 msgstr "Plus %s záloh za obal, vratný pri odovzdaní obalu."
 
-#: src/Model/Scheme.php:172
+#: src/Model/Scheme.php:137
 msgid ""
 "Single-use plastic bottle 0.1 l to 3 l (statutory minimum, the administrator "
 "sets the rate)"
@@ -376,61 +377,53 @@ msgstr ""
 "Jednorazowa butelka z tworzywa sztucznego od 0,1 l do 3 l (ustawowe minimum, "
 "stawkę ustala administrator)"
 
-#: src/Model/Scheme.php:176
+#: src/Model/Scheme.php:138
 msgid ""
 "Metal can 0.1 l to 3 l (statutory minimum, the administrator sets the rate)"
 msgstr ""
 "Puszka metalowa od 0,1 l do 3 l (ustawowe minimum, stawkę ustala "
 "administrator)"
 
-#: src/Model/Scheme.php:182
+#: src/Model/Scheme.php:144
 msgid "Hungary (DRS - Visszaváltási díj)"
 msgstr "Węgry (DRS - Visszaváltási díj)"
 
-#: src/Model/Scheme.php:186
+#: src/Model/Scheme.php:148
 msgid "Visszaváltási díj"
 msgstr "Visszaváltási díj"
 
 #. translators: %s: formatted deposit amount, e.g. 50 Ft
-#: src/Model/Scheme.php:188
+#: src/Model/Scheme.php:150
 #, php-format
 msgid "Plusz %s visszaváltási díj, visszaváltáskor visszajár."
 msgstr "Plusz %s visszaváltási díj, visszaváltáskor visszajár."
 
-#: src/Model/Scheme.php:197
-msgid "Single-use beverage container 0.1 l to 3 l (metal, plastic, glass)"
+#: src/Model/Scheme.php:157
+msgid "Reusable glass bottle (fee set by the producer, enter it here)"
 msgstr ""
-"Jednorazowe opakowanie na napoje od 0,1 l do 3 l (metal, plastik, szkło)"
+"Szklana butelka wielokrotnego użytku (opłatę ustala producent, wpisz ją "
+"tutaj)"
 
-#: src/Model/Scheme.php:202
-msgid "Reusable container (fee set by the producer, enter it here)"
-msgstr ""
-"Opakowanie wielokrotnego użytku (opłatę ustala producent, wpisz ją tutaj)"
-
-#: src/Model/Scheme.php:208
+#: src/Model/Scheme.php:161
 msgid "Custom deposit scheme"
 msgstr "Własny system kaucyjny"
 
-#: src/Model/Scheme.php:212 src/Service/DepositService.php:487
+#: src/Model/Scheme.php:165 src/Service/DepositService.php:397
 msgid "Deposit"
 msgstr "Kaucja"
 
 #. translators: %s: formatted deposit amount
-#: src/Model/Scheme.php:214
+#: src/Model/Scheme.php:167
 #, php-format
 msgid "Plus %s deposit, refunded upon return."
 msgstr "Dodatkowo kaucja %s, zwracana po oddaniu opakowania."
 
-#: src/Model/Scheme.php:223
-msgid "Standard container deposit"
-msgstr "Standardowa kaucja za opakowanie"
-
-#: src/Service/DepositService.php:102
+#: src/Service/DepositService.php:82
 msgid "None (not covered by deposit scheme)"
 msgstr "Brak (opakowanie nieobjęte systemem kaucyjnym)"
 
-#. translators: %s: container type label saved before Botelix 1.1.0
-#: src/Service/DepositService.php:122
+#. translators: 1: container category, 2: scheme name
+#: src/Service/DepositService.php:88
 #, php-format
-msgid "Current setting (legacy): %s"
-msgstr ""
+msgid "%1$s - not covered by %2$s"
+msgstr "%1$s - poza zakresem: %2$s"

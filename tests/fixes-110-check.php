@@ -1,9 +1,9 @@
 <?php
 /**
- * Self-check for the 1.1.0 fixes: defaults without a save, notice placeholders,
- * VAT-inclusive deposits, cross-border container mapping with the currency rule,
- * the notice on block single-product templates, VAT-exempt customers, legacy
- * container keys, the product editor's scheme override and the settings screen.
+ * Self-check for 1.1.0: defaults without a save, notice placeholders, the
+ * scheme x container category matrix, VAT-inclusive deposits, the currency
+ * rule, the notice on block single-product templates, VAT-exempt customers,
+ * the product editor's categories and scheme override, and the settings screen.
  *
  * Each section reports on its own, so a run against older code shows which
  * fixes are missing. Run: php tests/fixes-110-check.php
@@ -132,6 +132,22 @@ function wc_format_localized_decimal(string $value): string
 {
     return $value;
 }
+function wp_verify_nonce(string $nonce, string $action): bool
+{
+    return true;
+}
+function sanitize_key(string $key): string
+{
+    return strtolower((string) preg_replace('/[^a-z0-9_\-]/i', '', $key));
+}
+function wp_unslash(mixed $value): mixed
+{
+    return $value;
+}
+function absint(mixed $value): int
+{
+    return abs((int) $value);
+}
 
 class WC_Product
 {
@@ -159,6 +175,13 @@ class WC_Product
     public function is_taxable(): bool
     {
         return true;
+    }
+    public function update_meta_data(string $key, mixed $value): void
+    {
+        $this->meta[$key] = $value;
+    }
+    public function save_meta_data(): void
+    {
     }
 }
 
@@ -314,7 +337,7 @@ section('1 fresh install charges without a settings save', function (): void {
 section('2 notice template with %s or {amount} renders the amount', function (): void {
     foreach (['Plus %s kaucji.', 'Plus {amount} kaucji.'] as $template) {
         $svc = service(['enabled' => '1', 'default_scheme' => 'pl', 'product_notice_pl' => $template], 'PLN');
-        $GLOBALS['product'] = new WC_Product(2, [DS::META_TYPE => 'pet']);
+        $GLOBALS['product'] = new WC_Product(2, [DS::META_TYPE => 'plastic']);
         ob_start();
         $svc->renderProductNotice();
         $html = (string) ob_get_clean();
@@ -322,64 +345,89 @@ section('2 notice template with %s or {amount} renders the amount', function ():
     }
 });
 
-section('3 VAT: DE gross deposit stays the statutory amount, PL stays untaxed', function (): void {
+section('3 every scheme x category charges the expected default rate', function (): void {
+    // Expected values written out here, not read from Scheme.php; null = not covered.
+    $matrix = [
+        'pl'     => ['PLN', ['plastic' => 0.50, 'can' => 0.50, 'glass' => null, 'glass_reusable' => 1.00]],
+        'ro'     => ['RON', ['plastic' => 0.50, 'can' => 0.50, 'glass' => 0.50, 'glass_reusable' => null]],
+        'at'     => ['EUR', ['plastic' => 0.25, 'can' => 0.25, 'glass' => null, 'glass_reusable' => null]],
+        'de'     => ['EUR', ['plastic' => 0.25, 'can' => 0.25, 'glass' => 0.25, 'glass_reusable' => 0.15]],
+        'sk'     => ['EUR', ['plastic' => 0.12, 'can' => 0.10, 'glass' => null, 'glass_reusable' => null]],
+        'hu'     => ['HUF', ['plastic' => 50.0, 'can' => 50.0, 'glass' => 50.0, 'glass_reusable' => 0.0]],
+        'custom' => ['', ['plastic' => 0.25, 'can' => 0.25, 'glass' => 0.25, 'glass_reusable' => 0.25]],
+    ];
+    check(array_keys($matrix) === array_keys(Scheme::all()), 'scheme list changed: ' . json_encode(array_keys(Scheme::all())));
+    check(array_keys(Scheme::containers()) === ['plastic', 'can', 'glass', 'glass_reusable'], 'container categories changed');
+
+    $id = 300;
+    foreach ($matrix as $schemeId => [$currency, $rates]) {
+        $scheme = Scheme::get($schemeId);
+        check($scheme['currency'] === $currency, "$schemeId currency must be '$currency'");
+        check(array_keys($scheme['rates']) === array_keys($rates), "$schemeId must declare every category");
+        $svc = service(null, $currency === '' ? 'EUR' : $currency);
+        foreach ($rates as $category => $rate) {
+            check(($scheme['rates'][$category]['amount'] ?? null) === $rate, "$schemeId/$category must be " . json_encode($rate));
+            $charged = $svc->depositFor(new WC_Product(++$id, [DS::META_TYPE => $category, DS::META_UNITS => 2]), $schemeId);
+            check(abs($charged - 2 * (float) $rate) < 1e-9, "$schemeId/$category x2 charges $charged instead of " . 2 * (float) $rate);
+        }
+    }
+
+    check(Scheme::get('de')['taxable'] === true, 'DE must be stated including VAT');
+    foreach (['pl', 'ro', 'sk', 'hu', 'at', 'custom'] as $schemeId) {
+        check(Scheme::get($schemeId)['taxable'] === false, "$schemeId must be untaxed");
+    }
+});
+
+section('4 settings rate overrides only covered categories', function (): void {
+    $svc = service(['enabled' => '1', 'default_scheme' => 'hu', 'amount_hu_glass_reusable' => '70', 'amount_hu_plastic' => ''], 'HUF');
+    check($svc->depositFor(new WC_Product(40, [DS::META_TYPE => 'glass_reusable']), 'hu') === 70.0, 'HU reusable fee entered in settings is not charged');
+    check($svc->depositFor(new WC_Product(41, [DS::META_TYPE => 'plastic']), 'hu') === 50.0, 'empty HU plastic override must fall back to 50');
+    $svc = service(['enabled' => '1', 'default_scheme' => 'at', 'amount_at_glass' => '5'], 'EUR');
+    check($svc->depositFor(new WC_Product(42, [DS::META_TYPE => 'glass']), 'at') === 0.0, 'an amount for a category AT does not cover must not be charged');
+
+    $html = settingsHtml(service(['enabled' => '1', 'default_scheme' => 'pl'], 'PLN'));
+    check(str_contains($html, '[amount_hu_glass_reusable]') && str_contains($html, '[amount_de_glass_reusable]'), 'settings must offer the HU and DE reusable rates');
+    check(! str_contains($html, '[amount_at_glass]') && ! str_contains($html, '[amount_pl_glass]'), 'settings must not offer a rate for an uncovered category');
+    $saved = (new SettingsPage(service(null, 'PLN')))->sanitizeSettings(['amount_at_glass' => '5', 'amount_sk_plastic' => '0.15']);
+    check(! isset($saved['amount_at_glass']) && $saved['amount_sk_plastic'] === 0.15, 'sanitize must keep covered rates only: ' . json_encode($saved));
+});
+
+section('5 VAT: DE gross deposit stays the statutory amount, PL stays untaxed', function (): void {
     $svc  = service(['enabled' => '1', 'default_scheme' => 'de', 'enable_destination_matching' => '0'], 'EUR');
-    $std  = new WC_Product(3, [DS::META_TYPE => 'can', DS::META_UNITS => 6]);
-    $red  = new WC_Product(4, [DS::META_TYPE => 'einweg'], 'reduced-rate');
+    $std  = new WC_Product(50, [DS::META_TYPE => 'can', DS::META_UNITS => 6]);
+    $red  = new WC_Product(51, [DS::META_TYPE => 'glass'], 'reduced-rate');
     $cart = new WC_Cart([['data' => $std, 'quantity' => 1], ['data' => $red, 'quantity' => 2]]);
     $svc->applyCartFee($cart);
     check(abs($cart->gross() - 2.00) < 0.011, 'DE customer pays ' . $cart->gross() . ' instead of 6x0.25 + 2x0.25 = 2.00');
     $ids = array_column($cart->fees, 'id');
     check(count($ids) === 2 && count(array_unique($ids)) === 2, 'expected two fees with distinct ids, got ' . json_encode($ids));
+    check(! empty($cart->fees[0]['taxable']) && abs($cart->fees[0]['amount'] - 1.50 / 1.19) < 1e-9, 'DE fee must be the net share of 1.50 at 19%');
 
     $svc  = service(['enabled' => '1', 'default_scheme' => 'pl', 'enable_destination_matching' => '0'], 'PLN');
-    $cart = new WC_Cart([['data' => new WC_Product(5, [DS::META_TYPE => 'pet']), 'quantity' => 3]]);
+    $cart = new WC_Cart([['data' => new WC_Product(52, [DS::META_TYPE => 'plastic']), 'quantity' => 3]]);
     $svc->applyCartFee($cart);
     check(count($cart->fees) === 1 && empty($cart->fees[0]['taxable']) && abs($cart->gross() - 1.50) < 1e-9, 'PL fee must be 1.50 untaxed');
 });
 
-section('3 rates and VAT flags equal the verified acts', function (): void {
-    check(Scheme::get('de')['taxable'] === true, 'DE must be stated including VAT');
-    foreach (['pl', 'ro', 'sk', 'hu', 'at'] as $id) {
-        check(Scheme::get($id)['taxable'] === false, "$id must be untaxed");
-    }
-
-    $rates = [
-        'pl' => ['pet' => 0.50, 'can' => 0.50, 'glass_reusable' => 1.00],
-        'de' => ['einweg' => 0.25, 'can' => 0.25],
-        'at' => ['einweg' => 0.25],
-        'sk' => ['zaloh_single_use' => 0.12, 'zaloh_can' => 0.10],
-        'ro' => ['sgr_single_use' => 0.50],
-        'hu' => ['drs_single_use' => 50.0, 'drs_reusable' => 0.0],
-    ];
-    foreach ($rates as $id => $types) {
-        foreach ($types as $key => $amount) {
-            check((Scheme::get($id)['types'][$key]['amount'] ?? null) === $amount, "$id/$key must be $amount");
-        }
-    }
-});
-
-section('4 cross-border: one container maps to each scheme, same currency only', function (): void {
+section('6 cross-border: each scheme charges only in its own currency', function (): void {
     $svc     = service(['enabled' => '1', 'default_scheme' => 'de'], 'EUR');
-    $plastic = new WC_Product(6, [DS::META_TYPE => 'plastic']);
-    $legacy  = new WC_Product(7, [DS::META_TYPE => 'pet']);
-    $glass   = new WC_Product(8, [DS::META_TYPE => 'glass']);
-    check(abs($svc->depositFor($plastic, 'at') - 0.25) < 1e-9, 'plastic to AT must be 0.25');
-    check(abs($svc->depositFor($legacy, 'at') - 0.25) < 1e-9, 'pre-1.1.0 "pet" product to AT must be 0.25');
-    check(abs($svc->depositFor($plastic, 'sk') - 0.12) < 1e-9, 'plastic to SK must be 0.12');
+    $plastic = new WC_Product(60, [DS::META_TYPE => 'plastic']);
+    $glass   = new WC_Product(61, [DS::META_TYPE => 'glass']);
+    check(abs($svc->depositFor($plastic, 'at') - 0.25) < 1e-9, 'EUR store: plastic to AT must be 0.25');
+    check(abs($svc->depositFor($plastic, 'sk') - 0.12) < 1e-9, 'EUR store: plastic to SK must be 0.12');
+    check(abs($svc->depositFor($glass, 'de') - 0.25) < 1e-9, 'EUR store: single-use glass to DE must be 0.25');
     check($svc->depositFor($glass, 'at') === 0.0, 'single-use glass is not covered in AT');
     check($svc->depositFor($plastic, 'pl') === 0.0, 'PLN scheme must not be charged in an EUR store');
+    check($svc->depositFor($plastic, 'ro') === 0.0 && $svc->depositFor($plastic, 'hu') === 0.0, 'RON/HUF schemes must not be charged in an EUR store');
+    check(abs($svc->depositFor($plastic, 'custom') - 0.25) < 1e-9, 'custom scheme has no currency and charges in any store');
 
     $svc = service(['enabled' => '1', 'default_scheme' => 'pl', 'enable_destination_matching' => '1'], 'PLN');
-    check(abs($svc->depositFor($legacy, 'pl') - 0.50) < 1e-9, 'pre-1.1.0 "pet" product in PL keeps 0.50');
+    check(abs($svc->depositFor($plastic, 'pl') - 0.50) < 1e-9, 'PLN store: plastic in PL must be 0.50');
     check($svc->depositFor($plastic, 'de') === 0.0, 'EUR scheme must not be charged in a PLN store');
     check(array_keys($svc->unchargeableSchemes()) === ['ro', 'at', 'de', 'sk', 'hu'], 'settings warning must list ro, at, de, sk, hu');
-
-    $svc = service(['enabled' => '1', 'default_scheme' => 'pl'], 'EUR');
-    check($svc->depositFor($legacy, 'pl') === 0.0, 'PL rate must not be charged as EUR');
 });
 
-section('5 notice on block single-product templates, printed once', function (): void {
+section('7 notice on block single-product templates, printed once', function (): void {
     $GLOBALS['hooks'] = [];
     $svc = service(['enabled' => '1', 'default_scheme' => 'pl'], 'PLN');
     $svc->registerHooks();
@@ -396,7 +444,7 @@ section('5 notice on block single-product templates, printed once', function ():
     check((string) ob_get_clean() === '', 'summary hook printed the notice a second time');
 });
 
-section('6 VAT-exempt customer on DE pays the full 0.25 EUR, untaxed', function (): void {
+section('8 VAT-exempt customer on DE pays the full 0.25 EUR, untaxed', function (): void {
     $svc  = service(['enabled' => '1', 'default_scheme' => 'de', 'enable_destination_matching' => '0'], 'EUR');
     $GLOBALS['customer'] = new WC_Customer(true);
     $cart = new WC_Cart([['data' => new WC_Product(60, [DS::META_TYPE => 'can']), 'quantity' => 1]]);
@@ -412,44 +460,50 @@ section('6 VAT-exempt customer on DE pays the full 0.25 EUR, untaxed', function 
     check(abs($cart->gross() - 0.25) < 1e-9 && ! empty($cart->fees[0]['taxable']), 'taxed customer must still pay 0.25 with VAT inside');
 });
 
-section('7 ambiguous legacy key keeps its own scheme and invents no material', function (): void {
-    $svc    = service(['enabled' => '1', 'default_scheme' => 'de'], 'EUR');
-    $einweg = new WC_Product(70, [DS::META_TYPE => 'einweg']);
-    check(abs($svc->depositFor($einweg, 'de') - 0.25) < 1e-9, 'legacy einweg must keep 0.25 in DE');
-    check(abs($svc->depositFor($einweg, 'at') - 0.25) < 1e-9, 'legacy einweg must keep 0.25 in AT');
-    check($svc->depositFor($einweg, 'sk') === 0.0, 'legacy einweg (maybe glass) must not be charged as SK plastic');
-    $field = editorField($svc, 70);
-    check($field['value'] === 'einweg', 'editor preselects ' . $field['value'] . ' instead of the stored einweg');
-    check(str_contains((string) ($field['options']['einweg'] ?? ''), 'legacy'), 'editor must list einweg as the current legacy setting');
+section('9 editor offers the four categories and marks the ones the effective scheme does not cover', function (): void {
+    $svc = service(['enabled' => '1', 'default_scheme' => 'pl', 'enable_destination_matching' => '0'], 'PLN');
+    new WC_Product(90, [DS::META_TYPE => 'can']);
+    $field = editorField($svc, 90);
+    check(array_keys($field['options']) === ['', 'plastic', 'can', 'glass', 'glass_reusable'], 'editor options: ' . json_encode(array_keys($field['options'])));
+    check($field['value'] === 'can', 'editor preselects ' . $field['value'] . ' instead of the stored can');
+    check(str_contains($field['options']['glass'], 'not covered by Poland'), 'PL default: single-use glass must be marked not covered');
+    check(! str_contains($field['options']['glass_reusable'], 'not covered'), 'PL default: reusable glass is covered');
 
-    // Every scheme reads the custom scheme's custom_1 the same way: no single material.
-    $svc = service(['enabled' => '1', 'default_scheme' => 'custom'], 'EUR');
-    check($svc->depositFor(new WC_Product(71, [DS::META_TYPE => 'custom_1']), 'sk') === 0.0, 'legacy custom_1 must not be charged as SK plastic');
-    $svc = service(['enabled' => '1', 'default_scheme' => 'hu'], 'HUF');
-    check($svc->depositFor(new WC_Product(72, [DS::META_TYPE => 'drs_reusable']), 'custom') === 0.0, 'legacy drs_reusable (material unknown) must not be read as reusable glass');
+    // The product's override decides, not the store default.
+    new WC_Product(91, [DS::META_TYPE => 'glass_reusable', DS::META_SCHEME => 'at']);
+    $options = editorField($svc, 91)['options'];
+    check(str_contains($options['glass'], 'not covered by Austria') && str_contains($options['glass_reusable'], 'not covered by Austria'), 'AT override: both glass categories must be marked');
+    check(! str_contains($options['plastic'], 'not covered') && ! str_contains($options['can'], 'not covered'), 'AT override: plastic and can are covered');
 
-    // An unambiguous key still preselects its category, which charges the same everywhere.
-    $svc = service(['enabled' => '1', 'default_scheme' => 'pl'], 'PLN');
-    new WC_Product(73, [DS::META_TYPE => 'pet']);
-    check(editorField($svc, 73)['value'] === 'plastic', 'legacy pet must preselect the plastic category');
+    // Only a category is saved; an unknown value is cleared.
+    $product = new WC_Product(92);
+    $_POST = ['botelix_product_nonce' => 'n', DS::META_SCHEME => 'de', DS::META_TYPE => 'einweg', DS::META_UNITS => '6'];
+    (new ProductMetaBox($svc))->saveProductFields(92);
+    check($product->get_meta(DS::META_TYPE) === '', 'a value outside the four categories must not be saved');
+    $_POST[DS::META_TYPE] = 'glass';
+    (new ProductMetaBox($svc))->saveProductFields(92);
+    $_POST = [];
+    check($product->get_meta(DS::META_TYPE) === 'glass', 'a category must be saved');
+    check($svc->depositFor($product, 'pl') === 0.0, 'saved DE override with glass in a PLN store must not charge (currency rule)');
 });
 
-section('8 product editor follows the product scheme override', function (): void {
+section('10 scheme override in the editor drives the charge, variations follow the parent', function (): void {
     $svc = service(['enabled' => '1', 'default_scheme' => 'at', 'enable_destination_matching' => '0'], 'EUR');
-    new WC_Product(80, [DS::META_TYPE => 'mehrweg_bier', DS::META_SCHEME => 'de']);
-    $field = editorField($svc, 80);
-    check($field['value'] === 'mehrweg_bier', 'editor preselects ' . $field['value'] . ' instead of mehrweg_bier');
-    check(! str_contains((string) ($field['options']['mehrweg_bier'] ?? ''), 'legacy') && isset($field['options']['mehrweg_bier']), 'DE override must list mehrweg_bier as a DE type');
-    $saved = new WC_Product(81, [DS::META_TYPE => $field['value'], DS::META_SCHEME => 'de']);
-    check(abs($svc->depositFor($saved) - 0.08) < 1e-9, 'a plain save drops the DE Mehrweg deposit to ' . $svc->depositFor($saved));
+    $plain = new WC_Product(100, [DS::META_TYPE => 'glass_reusable']);
+    check($svc->depositFor($plain) === 0.0, 'AT store must not charge reusable glass');
+    new WC_Product(101, [DS::META_TYPE => 'glass_reusable', DS::META_SCHEME => 'de']);
+    $field = editorField($svc, 101);
+    check($field['value'] === 'glass_reusable' && ! str_contains($field['options']['glass_reusable'], 'not covered'), 'DE override: reusable glass must be offered as covered');
+    check(abs($svc->depositFor(wc_get_product(101)) - 0.15) < 1e-9, 'DE override must charge the 0.15 Mehrweg rate');
 
-    // A variation with its own container is charged under the parent's override.
-    new WC_Product(82, [DS::META_TYPE => 'can', DS::META_SCHEME => 'de']);
-    $variation = new WC_Product(83, [DS::META_TYPE => 'mehrweg_mineral'], '', 82);
-    check(abs($svc->depositFor($variation) - 0.15) < 1e-9, 'variation ignores the parent DE override');
+    new WC_Product(102, [DS::META_TYPE => 'can', DS::META_SCHEME => 'de']);
+    $variation = new WC_Product(103, [DS::META_TYPE => 'glass'], '', 102);
+    check(abs($svc->depositFor($variation) - 0.25) < 1e-9, 'variation with its own glass must be charged under the parent DE override');
+    $inherit = new WC_Product(104, [], '', 102);
+    check(abs($svc->depositFor($inherit) - 0.25) < 1e-9, 'variation without a container must inherit the parent can');
 });
 
-section('9 settings: VAT label needs WooCommerce taxes, currency warning needs the plugin on', function (): void {
+section('11 settings: VAT label needs WooCommerce taxes, currency warning needs the plugin on', function (): void {
     $GLOBALS['tax_enabled'] = false;
     $html = settingsHtml(service(['enabled' => '1', 'default_scheme' => 'de'], 'EUR'));
     $GLOBALS['tax_enabled'] = true;
