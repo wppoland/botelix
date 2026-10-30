@@ -72,6 +72,14 @@ Yes. When "Cross-Border Destination Matching" is enabled, Botelix checks the cus
 = Does it work with Cart and Checkout Blocks? =
 Yes. Botelix uses the native WooCommerce cart fees API and declares full compatibility with WooCommerce Cart and Checkout Blocks and High-Performance Order Storage (HPOS).
 
+== Screenshots ==
+
+1. Cart with a PET bottle, a 6-pack of cans and a returnable glass bottle: Botelix adds a separate "Deposit (kaucja)" line of 4,50 zl to the cart totals.
+2. Checkout order review with the same deposit line between the subtotal and the total.
+3. Product page for a 6-pack of cans with the deposit notice under the price: "Plus 3,00 zl statutory deposit, refunded when you return the packaging."
+4. Product editor, General tab: the Deposit Return Scheme fields (scheme override, packaging container, container units).
+5. Settings under WooCommerce > Deposit Return (DRS): enable switch, default scheme, cross-border matching, export exemption and the Polish scheme's label, notice and statutory rates.
+
 == Changelog ==
 
 = 1.0.2 =
