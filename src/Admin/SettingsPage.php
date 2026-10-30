@@ -57,7 +57,8 @@ final class SettingsPage implements HasHooks
         $sanitized = [];
 
         $sanitized['enabled'] = ! empty($input['enabled']) ? '1' : '0';
-        $sanitized['default_scheme'] = sanitize_key((string) ($input['default_scheme'] ?? Scheme::SCHEME_PL));
+        $scheme = sanitize_key((string) ($input['default_scheme'] ?? Scheme::SCHEME_PL));
+        $sanitized['default_scheme'] = Scheme::get($scheme) !== null ? $scheme : Scheme::SCHEME_PL;
         $sanitized['enable_destination_matching'] = ! empty($input['enable_destination_matching']) ? '1' : '0';
         $sanitized['exempt_unsupported_exports'] = ! empty($input['exempt_unsupported_exports']) ? '1' : '0';
 
@@ -192,7 +193,7 @@ final class SettingsPage implements HasHooks
                                 <tr>
                                     <th scope="row"><?php echo esc_html__('Fee Label', 'botelix'); ?></th>
                                     <td>
-                                        <input type="text" class="regular-text" name="<?php echo esc_attr(DepositService::OPTION); ?>[fee_label_<?php echo esc_attr($schemeId); ?>]" value="<?php echo esc_attr($settings['fee_label_' . $schemeId] ?? $scheme['default_label']); ?>" />
+                                        <input type="text" class="regular-text" name="<?php echo esc_attr(DepositService::OPTION); ?>[fee_label_<?php echo esc_attr($schemeId); ?>]" value="<?php echo esc_attr($settings['fee_label_' . $schemeId] ?? ''); ?>" placeholder="<?php echo esc_attr($scheme['default_label']); ?>" />
                                     </td>
                                 </tr>
                                 <tr>

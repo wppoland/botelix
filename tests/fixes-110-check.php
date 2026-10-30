@@ -516,5 +516,14 @@ section('11 settings: VAT label needs WooCommerce taxes, currency warning needs 
     check(! str_contains(settingsHtml(service(['enabled' => '0', 'default_scheme' => 'pl'], 'PLN')), $warning), 'currency warning shown while the plugin is disabled');
 });
 
+section('12 settings: unknown default scheme rejected, fee label not pre-filled', function (): void {
+    $saved = (new SettingsPage(service(null, 'PLN')))->sanitizeSettings(['default_scheme' => 'xx']);
+    check($saved['default_scheme'] === 'pl', 'unknown default_scheme must fall back to pl: ' . json_encode($saved));
+    $saved = (new SettingsPage(service(null, 'PLN')))->sanitizeSettings(['default_scheme' => 'de']);
+    check($saved['default_scheme'] === 'de', 'a known scheme must be kept');
+    $html = settingsHtml(service(['enabled' => '1', 'default_scheme' => 'pl'], 'PLN'));
+    check((bool) preg_match('/\[fee_label_pl\]" value="" placeholder="[^"]+"/', $html), 'fee label must be empty with the default as placeholder');
+});
+
 echo $failed === 0 ? "\nALL 1.1.0 CHECKS PASSED\n" : "\n$failed SECTION(S) FAILED\n";
 exit($failed === 0 ? 0 : 1);
