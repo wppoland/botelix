@@ -35,6 +35,10 @@ final class ProductMetaBox implements HasHooks
 
     public function renderProductFields(): void
     {
+        global $thepostid;
+
+        $stored = (string) get_post_meta((int) $thepostid, DepositService::META_TYPE, true);
+
         wp_nonce_field('botelix_save_product_fields', 'botelix_product_nonce');
 
         echo '<div class="options_group botelix-options-group">';
@@ -56,8 +60,9 @@ final class ProductMetaBox implements HasHooks
         woocommerce_wp_select([
             'id' => DepositService::META_TYPE,
             'label' => __('Packaging container', 'botelix'),
-            'description' => __('Select the covered container type to add the statutory deposit at checkout.', 'botelix'),
+            'description' => __('Select the container type. Each national scheme charges its own rate for it, or nothing where it is not covered.', 'botelix'),
             'desc_tip' => true,
+            'value' => $this->depositService->containerOptionValue($stored),
             'options' => $this->depositService->getPackagingTypeOptions(),
         ]);
 
@@ -127,7 +132,7 @@ final class ProductMetaBox implements HasHooks
         woocommerce_wp_select([
             'id' => DepositService::META_TYPE . '[' . $loop . ']',
             'label' => __('Packaging container', 'botelix'),
-            'value' => $currentType,
+            'value' => $this->depositService->containerOptionValue($currentType),
             'desc_tip' => true,
             'description' => __('Leave empty to inherit the parent packaging container setting.', 'botelix'),
             'options' => $this->depositService->getPackagingTypeOptions(),

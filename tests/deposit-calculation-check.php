@@ -34,6 +34,13 @@ function add_action(string $tag, $callback, int $priority = 10, int $accepted_ar
 }
 
 $GLOBALS['options'] = [];
+$GLOBALS['currency'] = 'PLN';
+
+// Each scheme is charged only in its own currency, so tests switch the store currency.
+function get_woocommerce_currency(): string
+{
+    return $GLOBALS['currency'];
+}
 
 function get_option(string $option, $default = false)
 {
@@ -120,16 +127,17 @@ assert($ro['taxable'] === false, 'Romania SGR is non-taxable');
 assert($ro['types']['sgr_single_use']['amount'] === 0.50, 'Romania SGR is 0.50 RON');
 
 $at = \Botelix\Model\Scheme::get('at');
-assert($at['taxable'] === true, 'Austria Einwegpfand is taxable (inclusive of VAT)');
+assert($at['taxable'] === false, 'Austria: the regulation states no VAT; untaxed unless the botelix_scheme_taxable filter says otherwise');
 assert($at['types']['einweg']['amount'] === 0.25, 'Austria Einwegpfand is 0.25 EUR');
 
 $de = \Botelix\Model\Scheme::get('de');
-assert($de['taxable'] === true, 'Germany Pfand is taxable');
+assert($de['taxable'] === true, 'Germany Pfand is stated including VAT');
 assert($de['types']['einweg']['amount'] === 0.25, 'Germany Einwegpfand is 0.25 EUR');
 
 $sk = \Botelix\Model\Scheme::get('sk');
 assert($sk['taxable'] === false, 'Slovakia Zaloh is non-taxable');
-assert($sk['types']['zaloh_single_use']['amount'] === 0.15, 'Slovakia Zaloh is 0.15 EUR');
+assert($sk['types']['zaloh_single_use']['amount'] === 0.12, 'Slovakia plastic minimum is 0.12 EUR');
+assert($sk['types']['zaloh_can']['amount'] === 0.10, 'Slovakia can minimum is 0.10 EUR');
 
 $hu = \Botelix\Model\Scheme::get('hu');
 assert($hu['taxable'] === false, 'Hungary DRS is non-taxable');
@@ -205,6 +213,7 @@ $deCan->set_meta(\Botelix\Service\DepositService::META_TYPE, 'can');
 $deCan->set_meta(\Botelix\Service\DepositService::META_UNITS, 1);
 $GLOBALS['products'][20] = $deCan;
 
+$GLOBALS['currency'] = 'EUR';
 $deDeposit = $depositService->depositFor($deCan, 'de');
 assert($deDeposit === 0.25, "German can deposit must be 0.25 EUR");
 
@@ -213,6 +222,7 @@ $roBottle->set_meta(\Botelix\Service\DepositService::META_TYPE, 'sgr_single_use'
 $roBottle->set_meta(\Botelix\Service\DepositService::META_UNITS, 1);
 $GLOBALS['products'][30] = $roBottle;
 
+$GLOBALS['currency'] = 'RON';
 $roDeposit = $depositService->depositFor($roBottle, 'ro');
 assert($roDeposit === 0.50, "Romanian SGR deposit must be 0.50 RON");
 
@@ -221,14 +231,16 @@ $skBottle->set_meta(\Botelix\Service\DepositService::META_TYPE, 'zaloh_single_us
 $skBottle->set_meta(\Botelix\Service\DepositService::META_UNITS, 1);
 $GLOBALS['products'][40] = $skBottle;
 
+$GLOBALS['currency'] = 'EUR';
 $skDeposit = $depositService->depositFor($skBottle, 'sk');
-assert($skDeposit === 0.15, "Slovak Zaloh deposit must be 0.15 EUR");
+assert($skDeposit === 0.12, "Slovak plastic deposit must be the 0.12 EUR minimum");
 
 $huBottle = new WC_Product(50);
 $huBottle->set_meta(\Botelix\Service\DepositService::META_TYPE, 'drs_single_use');
 $huBottle->set_meta(\Botelix\Service\DepositService::META_UNITS, 1);
 $GLOBALS['products'][50] = $huBottle;
 
+$GLOBALS['currency'] = 'HUF';
 $huDeposit = $depositService->depositFor($huBottle, 'hu');
 assert($huDeposit === 50.0, "Hungarian DRS deposit must be 50.0 HUF");
 

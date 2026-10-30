@@ -17,6 +17,10 @@ final class SettingsPage implements HasHooks
 {
     public const PAGE_SLUG = 'botelix-settings';
 
+    public function __construct(private DepositService $depositService)
+    {
+    }
+
     public function registerHooks(): void
     {
         add_action('admin_menu', [$this, 'registerMenu']);
@@ -40,12 +44,7 @@ final class SettingsPage implements HasHooks
         register_setting(self::PAGE_SLUG, DepositService::OPTION, [
             'type' => 'array',
             'sanitize_callback' => [$this, 'sanitizeSettings'],
-            'default' => [
-                'enabled' => '1',
-                'default_scheme' => Scheme::SCHEME_PL,
-                'enable_destination_matching' => '1',
-                'exempt_unsupported_exports' => '1',
-            ],
+            'default' => DepositService::DEFAULTS,
         ]);
     }
 
@@ -93,13 +92,40 @@ final class SettingsPage implements HasHooks
         }
 
         $raw      = get_option(DepositService::OPTION, []);
-        $settings = is_array($raw) ? $raw : [];
+        $settings = array_merge(DepositService::DEFAULTS, is_array($raw) ? $raw : []);
         ?>
         <div class="wrap botelix-settings-wrap">
             <h1><?php echo esc_html__('Botelix - Multi-Country Deposit Return Scheme (DRS)', 'botelix'); ?></h1>
             <p class="description">
-                <?php echo esc_html__('Configure statutory container deposit schemes for European ecommerce (Pfand, SGR, Kaucja, Zaloh, Visszavaltasi dij).', 'botelix'); ?>
+                <?php echo esc_html__('Configure statutory container deposit schemes for European ecommerce (Pfand, SGR, Kaucja, Záloh, Visszaváltási díj).', 'botelix'); ?>
             </p>
+
+            <?php
+            $unchargeable = $this->depositService->unchargeableSchemes();
+            if ($unchargeable !== []) :
+                ?>
+                <div class="notice notice-warning inline">
+                    <p><?php
+                        echo esc_html(sprintf(
+                            /* translators: %s: store currency code, e.g. PLN */
+                            __('These schemes charge nothing in this store. Their rates are set in law in their own currency, the store sells in %s, and Botelix does not convert currencies:', 'botelix'),
+                            $this->depositService->storeCurrency()
+                        ));
+                    ?></p>
+                    <ul style="list-style:disc; padding-left:20px;">
+                        <?php foreach ($unchargeable as $schemeId => $currency) : ?>
+                            <li><?php
+                                echo esc_html(sprintf(
+                                    /* translators: 1: scheme name, 2: scheme currency code, e.g. EUR */
+                                    __('%1$s (rates in %2$s)', 'botelix'),
+                                    (string) (Scheme::get($schemeId)['name'] ?? $schemeId),
+                                    $currency
+                                ));
+                            ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
 
             <form method="post" action="options.php">
                 <?php
@@ -154,7 +180,7 @@ final class SettingsPage implements HasHooks
                         <div class="botelix-scheme-card" style="background:#fff; border:1px solid #ccd0d4; padding:15px; margin-bottom:15px; border-radius:4px;">
                             <h3><?php echo esc_html($scheme['name']); ?></h3>
                             <p><strong><?php echo esc_html__('Legal basis:', 'botelix'); ?></strong> <code><?php echo esc_html($scheme['law']); ?></code></p>
-                            <p><strong><?php echo esc_html__('Tax status:', 'botelix'); ?></strong> <?php echo ! empty($scheme['taxable']) ? esc_html__('Taxable fee (included in / subject to VAT)', 'botelix') : esc_html__('Non-taxable fee (outside VAT base)', 'botelix'); ?></p>
+                            <p><strong><?php echo esc_html__('Tax status:', 'botelix'); ?></strong> <?php echo apply_filters('botelix_scheme_taxable', (bool) $scheme['taxable'], $schemeId) ? esc_html__('Amount includes VAT: the fee is the net share and WooCommerce adds the tax back', 'botelix') : esc_html__('Non-taxable fee (outside VAT base)', 'botelix'); ?></p>
 
                             <table class="form-table" style="margin-top:0;">
                                 <tr>
@@ -166,10 +192,10 @@ final class SettingsPage implements HasHooks
                                 <tr>
                                     <th scope="row"><?php echo esc_html__('Product Notice Template', 'botelix'); ?></th>
                                     <td>
-                                        <input type="text" class="large-text" name="<?php echo esc_attr(DepositService::OPTION); ?>[product_notice_<?php echo esc_attr($schemeId); ?>]" value="<?php echo esc_attr($settings['product_notice_' . $schemeId] ?? $scheme['default_notice']); ?>" />
+                                        <input type="text" class="large-text" name="<?php echo esc_attr(DepositService::OPTION); ?>[product_notice_<?php echo esc_attr($schemeId); ?>]" value="<?php echo esc_attr($settings['product_notice_' . $schemeId] ?? ''); ?>" placeholder="<?php echo esc_attr($scheme['default_notice']); ?>" />
                                         <p class="description"><?php
-                                            /* translators: %s: placeholder token for formatted deposit amount */
-                                            echo esc_html__('Use {amount} or %s for formatted deposit amount.', 'botelix');
+                                            /* translators: %s is shown literally: a placeholder token merchants may type */
+                                            echo esc_html__('Leave empty for the default text shown in the field. Use {amount} or %s where the formatted deposit amount goes.', 'botelix');
                                         ?></p>
                                     </td>
                                 </tr>
@@ -185,7 +211,7 @@ final class SettingsPage implements HasHooks
                                                         <?php echo esc_html($typeData['label']); ?>:
                                                     </label>
                                                     <input type="number" step="0.01" min="0" style="width:100px;" name="<?php echo esc_attr(DepositService::OPTION); ?>[amount_<?php echo esc_attr($schemeId . '_' . $typeKey); ?>]" value="<?php echo esc_attr((string) $amountVal); ?>" />
-                                                    <span><?php echo esc_html($scheme['currency']); ?></span>
+                                                    <span><?php echo esc_html($scheme['currency'] !== '' ? $scheme['currency'] : $this->depositService->storeCurrency()); ?></span>
                                                 </div>
                                             <?php endforeach; ?>
                                         </td>
