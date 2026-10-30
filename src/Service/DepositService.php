@@ -82,7 +82,7 @@ final class DepositService implements HasHooks
         // Classic template, and block templates through WooCommerce's compatibility layer.
         add_action('woocommerce_single_product_summary', [$this, 'renderProductNotice'], 12);
         // Block templates: right after the main product's Product Price block.
-        add_filter('render_block_woocommerce/product-price', [$this, 'appendNoticeToPriceBlock'], 10, 2);
+        add_filter('render_block_woocommerce/product-price', [$this, 'appendNoticeToPriceBlock'], 10, 3);
     }
 
     /**
@@ -368,18 +368,22 @@ final class DepositService implements HasHooks
     }
 
     /**
-     * Append the notice to the main product's price on block templates.
+     * Append the notice to the main product's price on block templates. A price
+     * block inside a product grid renders another product id and is skipped.
      *
-     * @param string               $content Rendered block.
-     * @param array<string, mixed> $block   Parsed block.
+     * @param string               $content  Rendered block.
+     * @param array<string, mixed> $block    Parsed block.
+     * @param \WP_Block|null       $instance Block instance carrying the postId context.
      */
-    public function appendNoticeToPriceBlock(string $content, array $block): string
+    public function appendNoticeToPriceBlock(string $content, array $block, ?\WP_Block $instance = null): string
     {
-        if (empty($block['attrs']['isDescendentOfSingleProductTemplate']) || ! is_product()) {
+        $productId = (int) ($instance->context['postId'] ?? 0);
+
+        if (! is_product() || $productId === 0 || $productId !== get_queried_object_id()) {
             return $content;
         }
 
-        $product = wc_get_product(get_queried_object_id());
+        $product = wc_get_product($productId);
 
         return $product instanceof \WC_Product ? $content . wp_kses_post($this->noticeHtml($product)) : $content;
     }

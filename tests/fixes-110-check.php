@@ -117,6 +117,14 @@ class WC_Product
     }
 }
 
+class WP_Block
+{
+    /** @param array<string, mixed> $context */
+    public function __construct(public array $context = [])
+    {
+    }
+}
+
 class WC_Tax
 {
     /** @return array<int, array{rate: float}> */
@@ -296,9 +304,10 @@ section('5 notice on block single-product templates, printed once', function ():
     check(in_array('render_block_woocommerce/product-price', $GLOBALS['hooks'], true), 'price block filter not registered');
     $GLOBALS['queried'] = 9;
     $GLOBALS['product'] = new WC_Product(9, [DS::META_TYPE => 'can', DS::META_UNITS => 6]);
-    $grid = $svc->appendNoticeToPriceBlock('<div>price</div>', ['attrs' => []]);
-    check($grid === '<div>price</div>', 'notice must not appear on a price block outside the single template');
-    $main = $svc->appendNoticeToPriceBlock('<div>price</div>', ['attrs' => ['isDescendentOfSingleProductTemplate' => true]]);
+    new WC_Product(10, [DS::META_TYPE => 'can']);
+    $grid = $svc->appendNoticeToPriceBlock('<div>price</div>', [], new WP_Block(['postId' => 10, 'queryId' => 1]));
+    check($grid === '<div>price</div>', 'notice must not appear on another product\'s price block');
+    $main = $svc->appendNoticeToPriceBlock('<div>price</div>', [], new WP_Block(['postId' => 9]));
     check(str_contains($main, '3,00 PLN'), 'notice missing after the main price block');
     ob_start();
     $svc->renderProductNotice();
