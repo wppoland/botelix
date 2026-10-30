@@ -103,7 +103,7 @@ final class ProductMetaBox implements HasHooks
 
         $product->update_meta_data(DepositService::META_SCHEME, $scheme);
         $product->update_meta_data(DepositService::META_TYPE, $type);
-        $product->update_meta_data(DepositService::META_UNITS, $units);
+        $product->update_meta_data(DepositService::META_UNITS, (string) $units);
         $product->save_meta_data();
     }
 
@@ -187,7 +187,7 @@ final class ProductMetaBox implements HasHooks
         }
 
         $product->update_meta_data(DepositService::META_TYPE, $type);
-        $product->update_meta_data(DepositService::META_UNITS, $units);
+        $product->update_meta_data(DepositService::META_UNITS, (string) $units);
         $product->save_meta_data();
     }
 }

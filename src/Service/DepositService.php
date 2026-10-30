@@ -218,6 +218,9 @@ final class DepositService implements HasHooks
         printf('<p class="botelix-deposit-notice">%s</p>', wp_kses_post($text));
     }
 
+    /**
+     * @param array<string, mixed> $scheme
+     */
     private function feeLabel(array $scheme): string
     {
         $schemeId = (string) ($this->resolver->resolveScheme() ?: Scheme::SCHEME_PL);
