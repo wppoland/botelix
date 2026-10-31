@@ -39,6 +39,9 @@ function add_filter(string $tag, mixed $callback, int $priority = 10, int $args 
 {
     $GLOBALS['hooks'][$tag] = $args;
 }
+function add_shortcode(string $tag, mixed $callback): void
+{
+}
 function apply_filters(string $hook, mixed $value, mixed ...$args): mixed
 {
     return $value;

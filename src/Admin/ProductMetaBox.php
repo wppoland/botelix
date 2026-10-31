@@ -84,6 +84,14 @@ final class ProductMetaBox implements HasHooks
             'data_type' => 'price',
         ]);
 
+        woocommerce_wp_text_input([
+            'id' => DepositService::META_CRATE_AMOUNT,
+            'label' => __('Crate / outer packaging deposit', 'botelix'),
+            'description' => __('Optional. Additional deposit for a crate or case, charged on top of the container deposits (e.g. 1.50 for a beer crate). Leave empty when not selling in a crate.', 'botelix'),
+            'desc_tip' => true,
+            'data_type' => 'price',
+        ]);
+
         echo '</div>';
     }
 
@@ -119,6 +127,7 @@ final class ProductMetaBox implements HasHooks
         $product->update_meta_data(DepositService::META_TYPE, $type);
         $product->update_meta_data(DepositService::META_UNITS, (string) $units);
         $product->update_meta_data(DepositService::META_AMOUNT, $this->amount(isset($_POST[DepositService::META_AMOUNT]) ? sanitize_text_field(wp_unslash($_POST[DepositService::META_AMOUNT])) : ''));
+        $product->update_meta_data(DepositService::META_CRATE_AMOUNT, $this->amount(isset($_POST[DepositService::META_CRATE_AMOUNT]) ? sanitize_text_field(wp_unslash($_POST[DepositService::META_CRATE_AMOUNT])) : ''));
         $product->save_meta_data();
     }
 
@@ -171,6 +180,16 @@ final class ProductMetaBox implements HasHooks
             'wrapper_class' => 'form-row form-row-first',
         ]);
 
+        woocommerce_wp_text_input([
+            'id' => DepositService::META_CRATE_AMOUNT . '[' . $loop . ']',
+            'label' => __('Crate / outer deposit', 'botelix'),
+            'value' => (string) $product->get_meta(DepositService::META_CRATE_AMOUNT, true),
+            'desc_tip' => true,
+            'description' => __('Optional. Additional deposit for a crate or case, charged on top of the container deposits. Leave empty when not selling in a crate.', 'botelix'),
+            'data_type' => 'price',
+            'wrapper_class' => 'form-row form-row-last',
+        ]);
+
         echo '</div>';
     }
 
@@ -215,6 +234,7 @@ final class ProductMetaBox implements HasHooks
         $product->update_meta_data(DepositService::META_TYPE, $type);
         $product->update_meta_data(DepositService::META_UNITS, (string) $units);
         $product->update_meta_data(DepositService::META_AMOUNT, $this->amount(isset($_POST[DepositService::META_AMOUNT][$i]) ? sanitize_text_field(wp_unslash($_POST[DepositService::META_AMOUNT][$i])) : ''));
+        $product->update_meta_data(DepositService::META_CRATE_AMOUNT, $this->amount(isset($_POST[DepositService::META_CRATE_AMOUNT][$i]) ? sanitize_text_field(wp_unslash($_POST[DepositService::META_CRATE_AMOUNT][$i])) : ''));
         $product->save_meta_data();
     }
 

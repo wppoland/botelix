@@ -20,6 +20,7 @@ final class DepositService implements HasHooks
     public const META_UNITS  = '_botelix_packaging_units';
     public const META_SCHEME = '_botelix_scheme_override';
     public const META_AMOUNT = '_botelix_deposit_amount';
+    public const META_CRATE_AMOUNT = '_botelix_crate_amount';
 
     /**
      * Order item meta: the deposit snapshot taken when the order was placed.
@@ -79,6 +80,9 @@ final class DepositService implements HasHooks
         add_filter('woocommerce_get_item_data', [$this, 'cartItemData'], 10, 2);
         // Snapshot on the order item: order view, admin, emails show the visible meta.
         add_action('woocommerce_checkout_create_order_line_item', [$this, 'snapshotOrderItem'], 10, 4);
+        // Shortcodes to place deposit notice and packaging type in custom builder templates.
+        add_shortcode('botelix_deposit', [$this, 'renderShortcode']);
+        add_shortcode('botelix_packaging_type', [$this, 'renderPackagingShortcode']);
     }
 
     /**
@@ -226,11 +230,21 @@ final class DepositService implements HasHooks
         $override = $this->schemeOverride($source);
         $active   = $override !== '' ? $override : $resolved;
 
-        if ($category === '' || ! $this->isChargeable($active)) {
+        $crate        = (string) $source->get_meta(self::META_CRATE_AMOUNT, true);
+        $crateDeposit = ($crate !== '' && is_numeric($crate)) ? max(0.0, (float) $crate) : 0.0;
+
+        if ($category === '' && $crateDeposit <= 0.0) {
+            return [$active, 0.0, ''];
+        }
+
+        if (! $this->isChargeable($active)) {
             return [$active, 0.0, $category];
         }
 
-        return [$active, $this->unitAmount($source, $category, $active, $override) * max(1, (int) $units), $category];
+        $unitsDeposit = $category !== '' ? $this->unitAmount($source, $category, $active, $override) * max(1, (int) $units) : 0.0;
+        $total        = $unitsDeposit + $crateDeposit;
+
+        return [$active, $total, $category];
     }
 
     /**
@@ -562,5 +576,66 @@ final class DepositService implements HasHooks
         }
 
         return (string) (Scheme::get($schemeId)['default_label'] ?? __('Deposit', 'botelix'));
+    }
+
+    /**
+     * Shortcode [botelix_deposit id="..."]: renders the deposit notice for a product.
+     *
+     * @param array<string, mixed>|string $atts Shortcode attributes.
+     */
+    public function renderShortcode(array|string $atts = []): string
+    {
+        $atts = shortcode_atts([
+            'id' => 0,
+        ], is_array($atts) ? $atts : [], 'botelix_deposit');
+
+        $productId = (int) $atts['id'];
+        if ($productId > 0) {
+            $product = wc_get_product($productId);
+        } else {
+            global $product;
+        }
+
+        if (! $product instanceof \WC_Product) {
+            return '';
+        }
+
+        $text = $this->noticeText($product);
+        if ($text === '') {
+            return '';
+        }
+
+        return sprintf('<span class="botelix-deposit-notice">%s</span>', wp_kses_post($text));
+    }
+
+    /**
+     * Shortcode [botelix_packaging_type id="..."]: prints EINWEG or MEHRWEG for German DRS products.
+     *
+     * @param array<string, mixed>|string $atts Shortcode attributes.
+     */
+    public function renderPackagingShortcode(array|string $atts = []): string
+    {
+        $atts = shortcode_atts([
+            'id' => 0,
+        ], is_array($atts) ? $atts : [], 'botelix_packaging_type');
+
+        $productId = (int) $atts['id'];
+        if ($productId > 0) {
+            $product = wc_get_product($productId);
+        } else {
+            global $product;
+        }
+
+        if (! $product instanceof \WC_Product) {
+            return '';
+        }
+
+        [$schemeId, , $category] = $this->itemDeposit($product);
+        $label = $this->packagingLabel($schemeId, $category);
+        if ($label === '') {
+            return '';
+        }
+
+        return sprintf('<span class="botelix-packaging-type">%s</span>', esc_html($label));
     }
 }

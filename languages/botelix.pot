@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh) 1.4.0\n"
+"Project-Id-Version: Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh) 1.5.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/botelix\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-31T13:16:04+00:00\n"
+"POT-Creation-Date: 2026-10-31T17:20:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: botelix\n"
@@ -60,7 +60,7 @@ msgid "Optionally lock this product to a specific national scheme, or leave as d
 msgstr ""
 
 #: src/Admin/ProductMetaBox.php:63
-#: src/Admin/ProductMetaBox.php:145
+#: src/Admin/ProductMetaBox.php:154
 msgid "Packaging container"
 msgstr ""
 
@@ -69,7 +69,7 @@ msgid "Select the container type. Each national scheme charges its own rate for 
 msgstr ""
 
 #: src/Admin/ProductMetaBox.php:72
-#: src/Admin/ProductMetaBox.php:155
+#: src/Admin/ProductMetaBox.php:164
 msgid "Container units"
 msgstr ""
 
@@ -78,7 +78,7 @@ msgid "Number of covered containers in this item (e.g. 6 for a 6-pack). Defaults
 msgstr ""
 
 #: src/Admin/ProductMetaBox.php:81
-#: src/Admin/ProductMetaBox.php:166
+#: src/Admin/ProductMetaBox.php:175
 msgid "Deposit per container"
 msgstr ""
 
@@ -86,16 +86,32 @@ msgstr ""
 msgid "Optional. Replaces the scheme rate from the settings for this product, in the scheme currency, under the scheme override above or else the store default scheme. Use it where products in the same container category carry different deposits. Leave empty to use the rate from the settings."
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:148
+#: src/Admin/ProductMetaBox.php:89
+msgid "Crate / outer packaging deposit"
+msgstr ""
+
+#: src/Admin/ProductMetaBox.php:90
+msgid "Optional. Additional deposit for a crate or case, charged on top of the container deposits (e.g. 1.50 for a beer crate). Leave empty when not selling in a crate."
+msgstr ""
+
+#: src/Admin/ProductMetaBox.php:157
 msgid "Leave empty to inherit the parent packaging container setting."
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:158
+#: src/Admin/ProductMetaBox.php:167
 msgid "Containers in this variation."
 msgstr ""
 
-#: src/Admin/ProductMetaBox.php:169
+#: src/Admin/ProductMetaBox.php:178
 msgid "Optional. Replaces the scheme rate for this variation when it has its own container. Leave empty to use the rate from the settings."
+msgstr ""
+
+#: src/Admin/ProductMetaBox.php:185
+msgid "Crate / outer deposit"
+msgstr ""
+
+#: src/Admin/ProductMetaBox.php:188
+msgid "Optional. Additional deposit for a crate or case, charged on top of the container deposits. Leave empty when not selling in a crate."
 msgstr ""
 
 #: src/Admin/SettingsPage.php:37
@@ -211,7 +227,7 @@ msgid "Metal beverage can"
 msgstr ""
 
 #: src/Model/Scheme.php:43
-#: src/Model/Scheme.php:229
+#: src/Model/Scheme.php:230
 msgid "Single-use glass bottle"
 msgstr ""
 
@@ -403,222 +419,222 @@ msgstr ""
 msgid "Finland (Pantti)"
 msgstr ""
 
-#: src/Model/Scheme.php:220
+#: src/Model/Scheme.php:221
 msgid "Deposit (pantti)"
 msgstr ""
 
 #. translators: %s: formatted deposit amount, e.g. 0,20 EUR
-#: src/Model/Scheme.php:222
+#: src/Model/Scheme.php:223
 #, php-format
 msgid "Plus %s deposit (pantti), refunded when you return the container."
 msgstr ""
 
-#: src/Model/Scheme.php:227
+#: src/Model/Scheme.php:228
 msgid "Plastic bottle over 0.35 l and under 1.0 l (up to 0.35 l: 0.10 EUR, 1.0 l or more: 0.40 EUR, set it on the product)"
 msgstr ""
 
-#: src/Model/Scheme.php:228
+#: src/Model/Scheme.php:229
 msgid "Metal can"
 msgstr ""
 
-#: src/Model/Scheme.php:230
+#: src/Model/Scheme.php:231
 msgid "Refillable glass bottle (statutory minimum, enter the rate of its own return system)"
 msgstr ""
 
-#: src/Model/Scheme.php:234
+#: src/Model/Scheme.php:235
 msgid "Estonia (Pandipakend)"
 msgstr ""
 
-#: src/Model/Scheme.php:239
+#: src/Model/Scheme.php:240
 msgid "Deposit (tagatisraha)"
 msgstr ""
 
 #. translators: %s: formatted deposit amount, e.g. 0,10 EUR
-#: src/Model/Scheme.php:241
+#: src/Model/Scheme.php:242
 #, php-format
 msgid "Plus %s deposit (tagatisraha), refunded when you return the container."
 msgstr ""
 
-#: src/Model/Scheme.php:248
+#: src/Model/Scheme.php:249
 msgid "Reusable glass bottle 0.1 l to 3 l"
 msgstr ""
 
-#: src/Model/Scheme.php:252
+#: src/Model/Scheme.php:253
 msgid "Latvia (Depozīta sistēma)"
 msgstr ""
 
-#: src/Model/Scheme.php:260
+#: src/Model/Scheme.php:261
 msgid "Deposit (depozīta maksa)"
 msgstr ""
 
 #. translators: %s: formatted deposit amount, e.g. 0,10 EUR
-#: src/Model/Scheme.php:262
+#: src/Model/Scheme.php:263
 #, php-format
 msgid "Plus %s deposit (depozīta maksa), refunded when you return the container."
 msgstr ""
 
-#: src/Model/Scheme.php:267
+#: src/Model/Scheme.php:268
 msgid "PET bottle 0.1 l to under 3 l"
 msgstr ""
 
-#: src/Model/Scheme.php:268
+#: src/Model/Scheme.php:269
 msgid "Metal can 0.1 l to under 3 l"
 msgstr ""
 
-#: src/Model/Scheme.php:269
+#: src/Model/Scheme.php:270
 msgid "Single-use glass bottle 0.1 l to under 3 l (not wine, bitters or liqueurs)"
 msgstr ""
 
-#: src/Model/Scheme.php:270
+#: src/Model/Scheme.php:271
 msgid "Reusable glass bottle 0.1 l to under 3 l (not wine, bitters or liqueurs)"
 msgstr ""
 
-#: src/Model/Scheme.php:274
+#: src/Model/Scheme.php:275
 msgid "Netherlands (Statiegeld)"
 msgstr ""
 
-#: src/Model/Scheme.php:281
+#: src/Model/Scheme.php:282
 msgid "Deposit (statiegeld)"
 msgstr ""
 
 #. translators: %s: formatted deposit amount, e.g. 0,15 EUR
-#: src/Model/Scheme.php:283
+#: src/Model/Scheme.php:284
 #, php-format
 msgid "Plus %s deposit (statiegeld), refunded when you return the container."
 msgstr ""
 
-#: src/Model/Scheme.php:288
+#: src/Model/Scheme.php:289
 msgid "Plastic bottle under 1 l, water or soft drink (1 l to 3 l: 0.25 EUR, set it on the product)"
 msgstr ""
 
-#: src/Model/Scheme.php:289
+#: src/Model/Scheme.php:290
 msgid "Metal can up to 3 l"
 msgstr ""
 
-#: src/Model/Scheme.php:295
+#: src/Model/Scheme.php:296
 msgid "Ireland (Deposit Return Scheme)"
 msgstr ""
 
-#: src/Model/Scheme.php:301
-#: src/Model/Scheme.php:376
-#: src/Service/DepositService.php:564
+#: src/Model/Scheme.php:302
+#: src/Model/Scheme.php:377
+#: src/Service/DepositService.php:578
 msgid "Deposit"
 msgstr ""
 
 #. translators: %s: formatted deposit amount, e.g. 0,15 EUR
-#: src/Model/Scheme.php:303
+#: src/Model/Scheme.php:304
 #, php-format
 msgid "Plus %s deposit, refunded when you return the container."
 msgstr ""
 
-#: src/Model/Scheme.php:307
+#: src/Model/Scheme.php:308
 msgid "PET bottle 0.15 l to 0.5 l (over 0.5 l: 0.25 EUR, set it on the product)"
 msgstr ""
 
-#: src/Model/Scheme.php:308
+#: src/Model/Scheme.php:309
 msgid "Aluminium or steel can 0.15 l to 0.5 l (over 0.5 l: 0.25 EUR, set it on the product)"
 msgstr ""
 
-#: src/Model/Scheme.php:314
+#: src/Model/Scheme.php:315
 msgid "Croatia (Povratna naknada)"
 msgstr ""
 
-#: src/Model/Scheme.php:321
+#: src/Model/Scheme.php:322
 msgid "Deposit (povratna naknada)"
 msgstr ""
 
 #. translators: %s: formatted deposit amount, e.g. 0,10 EUR
-#: src/Model/Scheme.php:323
+#: src/Model/Scheme.php:324
 #, php-format
 msgid "Plus %s deposit (povratna naknada), refunded when you return the container."
 msgstr ""
 
-#: src/Model/Scheme.php:328
+#: src/Model/Scheme.php:329
 msgid "PET bottle 0.2 l to 3 l (until 31.12.2026; from 2027 any single-use plastic up to 3 l)"
 msgstr ""
 
-#: src/Model/Scheme.php:329
+#: src/Model/Scheme.php:330
 msgid "Metal can 0.2 l to 3 l (until 31.12.2026; from 2027 up to 3 l)"
 msgstr ""
 
-#: src/Model/Scheme.php:330
+#: src/Model/Scheme.php:331
 msgid "Single-use glass bottle 0.2 l to 3 l (until 31.12.2026; from 2027 up to 3 l)"
 msgstr ""
 
-#: src/Model/Scheme.php:335
+#: src/Model/Scheme.php:336
 msgid "Malta (Beverage Container Refund Scheme)"
 msgstr ""
 
-#: src/Model/Scheme.php:340
+#: src/Model/Scheme.php:341
 msgid "Deposit (depożitu)"
 msgstr ""
 
 #. translators: %s: formatted deposit amount, e.g. 0,10 EUR
-#: src/Model/Scheme.php:342
+#: src/Model/Scheme.php:343
 #, php-format
 msgid "Plus %s deposit (depożitu), refunded when you return the container."
 msgstr ""
 
-#: src/Model/Scheme.php:346
+#: src/Model/Scheme.php:347
 msgid "PET bottle 0.1 l to 3 l (statutory minimum)"
 msgstr ""
 
-#: src/Model/Scheme.php:347
+#: src/Model/Scheme.php:348
 msgid "Steel or aluminium can 0.1 l to 3 l (statutory minimum)"
 msgstr ""
 
-#: src/Model/Scheme.php:348
+#: src/Model/Scheme.php:349
 msgid "Single-use glass bottle 0.1 l to 3 l (statutory minimum)"
 msgstr ""
 
-#: src/Model/Scheme.php:349
+#: src/Model/Scheme.php:350
 msgid "Refillable container 0.1 l to 3 l (statutory minimum, the producer system sets the value)"
 msgstr ""
 
-#: src/Model/Scheme.php:353
+#: src/Model/Scheme.php:354
 msgid "Portugal (Sistema de Depósito e Reembolso)"
 msgstr ""
 
-#: src/Model/Scheme.php:358
+#: src/Model/Scheme.php:359
 msgid "Deposit (depósito)"
 msgstr ""
 
 #. translators: %s: formatted deposit amount, e.g. 0,10 EUR
-#: src/Model/Scheme.php:360
+#: src/Model/Scheme.php:361
 #, php-format
 msgid "Plus %s deposit (depósito), refunded when you return the container."
 msgstr ""
 
-#: src/Model/Scheme.php:365
+#: src/Model/Scheme.php:366
 msgid "Single-use plastic bottle under 3 l"
 msgstr ""
 
-#: src/Model/Scheme.php:366
+#: src/Model/Scheme.php:367
 msgid "Metal can under 3 l"
 msgstr ""
 
-#: src/Model/Scheme.php:372
+#: src/Model/Scheme.php:373
 msgid "Custom deposit scheme"
 msgstr ""
 
 #. translators: %s: formatted deposit amount
-#: src/Model/Scheme.php:378
+#: src/Model/Scheme.php:379
 #, php-format
 msgid "Plus %s deposit, refunded upon return."
 msgstr ""
 
-#: src/Service/DepositService.php:94
+#: src/Service/DepositService.php:98
 msgid "None (not covered by deposit scheme)"
 msgstr ""
 
 #. translators: 1: container category, 2: scheme name
-#: src/Service/DepositService.php:100
+#: src/Service/DepositService.php:104
 #, php-format
 msgid "%1$s - not covered by %2$s"
 msgstr ""
 
 #. translators: 1: line deposit total, 2: deposit per item
-#: src/Service/DepositService.php:364
+#: src/Service/DepositService.php:378
 #, php-format
 msgid "%1$s (%2$s per item)"
 msgstr ""
