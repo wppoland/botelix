@@ -21,6 +21,11 @@ final class DepositService implements HasHooks
     public const META_SCHEME = '_botelix_scheme_override';
 
     /**
+     * Order item meta: the deposit snapshot taken when the order was placed.
+     */
+    public const ITEM_META = '_botelix_deposit';
+
+    /**
      * Settings in effect before the settings screen is ever saved.
      */
     public const DEFAULTS = [
@@ -67,6 +72,12 @@ final class DepositService implements HasHooks
         add_action('woocommerce_single_product_summary', [$this, 'renderProductNotice'], 12);
         // Block templates: right after the main product's Product Price block.
         add_filter('render_block_woocommerce/product-price', [$this, 'appendNoticeToPriceBlock'], 10, 3);
+        // Every other price: shop, category, search, related products, block grids, Store API.
+        add_filter('woocommerce_get_price_html', [$this, 'filterPriceHtml'], 10, 2);
+        // Deposit per line: classic and block cart and checkout.
+        add_filter('woocommerce_get_item_data', [$this, 'cartItemData'], 10, 2);
+        // Snapshot on the order item: order view, admin, emails show the visible meta.
+        add_action('woocommerce_checkout_create_order_line_item', [$this, 'snapshotOrderItem'], 10, 4);
     }
 
     /**
@@ -190,13 +201,13 @@ final class DepositService implements HasHooks
      * scheme) and the deposit for one item. A scheme that cannot be charged in
      * the store currency gives 0.
      *
-     * @return array{0: ?string, 1: float}
+     * @return array{0: ?string, 1: float, 2: string} scheme, deposit, container category
      */
     private function itemDeposit(\WC_Product $product, ?string $schemeId = null): array
     {
         $resolved = $schemeId ?: $this->resolver->resolveScheme();
         if ($resolved === null) {
-            return [null, 0.0];
+            return [null, 0.0, ''];
         }
 
         $source = $product;
@@ -215,10 +226,141 @@ final class DepositService implements HasHooks
         $active   = $override !== '' ? $override : $resolved;
 
         if ($category === '' || ! $this->isChargeable($active)) {
-            return [$active, 0.0];
+            return [$active, 0.0, $category];
         }
 
-        return [$active, $this->amountFor($category, $active) * max(1, (int) $units)];
+        return [$active, $this->amountFor($category, $active) * max(1, (int) $units), $category];
+    }
+
+    /**
+     * EINWEG or MEHRWEG for a container under the German scheme, '' elsewhere.
+     * VerpackDG s. 47(1) and (2) prescribe these German words, so they are not
+     * translated. Over 3.0 l and s. 46(4) no. 7 drinks need no MEHRWEG notice;
+     * Botelix has no volume data, so the merchant's container tag decides.
+     */
+    public function packagingLabel(?string $schemeId, string $category): string
+    {
+        if ($schemeId !== Scheme::SCHEME_DE || $category === '') {
+            return '';
+        }
+
+        return $category === 'glass_reusable' ? 'MEHRWEG' : 'EINWEG';
+    }
+
+    /**
+     * Add the packaging label and the deposit to a price. Both sit inside the
+     * price markup, so the label takes the price's font and size (VerpackDG
+     * s. 47(4)) and the deposit stands next to the price (PAngV s. 7). The main
+     * product of a single product page already gets the notice under its price.
+     */
+    public function filterPriceHtml(string $html, \WC_Product $product): string
+    {
+        if ($html === '' || (is_admin() && ! wp_doing_ajax())) {
+            return $html;
+        }
+
+        [$schemeId, , $category] = $this->itemDeposit($product);
+
+        $label = $this->packagingLabel($schemeId, $category);
+        if ($label !== '') {
+            $html .= ' <span class="botelix-packaging-type">' . esc_html($label) . '</span>';
+        }
+
+        $main = is_product() && in_array(get_queried_object_id(), [$product->get_id(), $product->get_parent_id()], true);
+        $text = $main ? '' : $this->noticeText($product);
+
+        if ($text !== '') {
+            $html .= ' <small class="botelix-deposit-notice">' . wp_kses_post($text) . '</small>';
+        }
+
+        return $html;
+    }
+
+    /**
+     * Deposit row under a cart line.
+     *
+     * @param array<int, array<string, mixed>> $data
+     * @param array<string, mixed>             $cartItem
+     * @return array<int, array<string, mixed>>
+     */
+    public function cartItemData(array $data, array $cartItem): array
+    {
+        $line = $this->lineDeposit($cartItem['data'] ?? null, (int) ($cartItem['quantity'] ?? 1));
+
+        if ($line !== null) {
+            $data[] = ['key' => $line['name'], 'value' => $line['text']];
+        }
+
+        return $data;
+    }
+
+    /**
+     * Store the line's deposit on the order item: a hidden snapshot for
+     * returns and accounting, and a visible row WooCommerce prints on the
+     * order page, in the admin and in every order email.
+     *
+     * @param array<string, mixed> $values Cart item.
+     */
+    public function snapshotOrderItem(\WC_Order_Item_Product $item, string $cartItemKey, array $values, \WC_Order $order): void
+    {
+        $line = $this->lineDeposit($values['data'] ?? null, (int) ($values['quantity'] ?? 1), $order->get_currency());
+        if ($line === null) {
+            return;
+        }
+
+        $item->add_meta_data(self::ITEM_META, array_diff_key($line, ['name' => 0, 'text' => 0]), true);
+        $item->add_meta_data($line['name'], $line['text'], true);
+    }
+
+    /**
+     * Deposit of a cart line, or null when it carries none.
+     *
+     * @return array{scheme: string, category: string, packaging: string, unit: float, quantity: int, total: float, name: string, text: string}|null
+     */
+    private function lineDeposit(mixed $product, int $quantity, string $currency = ''): ?array
+    {
+        if (! $product instanceof \WC_Product) {
+            return null;
+        }
+
+        [$schemeId, $unit, $category] = $this->itemDeposit($product);
+        if ($schemeId === null || $unit <= 0.0) {
+            return null;
+        }
+
+        $quantity  = max(1, $quantity);
+        $total     = $unit * $quantity;
+        $args      = $currency !== '' ? ['currency' => $currency] : [];
+        $packaging = $this->packagingLabel($schemeId, $category);
+        $text      = $this->plainPrice($total, $args);
+
+        if ($quantity > 1) {
+            /* translators: 1: line deposit total, 2: deposit per item */
+            $text = sprintf(__('%1$s (%2$s per item)', 'botelix'), $text, $this->plainPrice($unit, $args));
+        }
+
+        if ($packaging !== '') {
+            $text = $packaging . ', ' . $text;
+        }
+
+        return [
+            'scheme' => $schemeId,
+            'category' => $category,
+            'packaging' => $packaging,
+            'unit' => $unit,
+            'quantity' => $quantity,
+            'total' => $total,
+            'name' => $this->feeLabel($schemeId),
+            'text' => $text,
+        ];
+    }
+
+    /**
+     * @param array<string, string> $args wc_price() arguments.
+     */
+    private function plainPrice(float $amount, array $args): string
+    {
+        return html_entity_decode(wp_strip_all_tags(wc_price($amount, $args)), ENT_QUOTES, 'UTF-8');
     }
 
     /**
