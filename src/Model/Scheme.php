@@ -214,8 +214,9 @@ final class Scheme
                 'name' => __('Finland (Pantti)', 'botelix'),
                 'law' => 'Jätelaki 646/2011, 68-69 §; Valtioneuvoston asetus 526/2013, 2 §',
                 'currency' => 'EUR',
-                // Arvonlisäverolaki 1501/1993 85 b §: the deposit is taxed; 139 a § allows
-                // the drink's own rate, which the fee takes from the product's tax class.
+                // Arvonlisäverolaki 1501/1993 85 b §: the deposit is taxed at 25.5 %;
+                // 139 a § allows the drink's own rate where the two cannot be separated
+                // without considerable difficulty. The fee takes the product's tax class.
                 'taxable' => true,
                 'default_label' => __('Deposit (pantti)', 'botelix'),
                 /* translators: %s: formatted deposit amount, e.g. 0,20 EUR */
