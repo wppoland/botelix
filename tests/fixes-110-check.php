@@ -362,6 +362,16 @@ section('3 every scheme x category charges the expected default rate', function 
         'de'     => ['EUR', ['plastic' => 0.25, 'can' => 0.25, 'glass' => 0.25, 'glass_reusable' => 0.15]],
         'sk'     => ['EUR', ['plastic' => 0.12, 'can' => 0.10, 'glass' => null, 'glass_reusable' => null]],
         'hu'     => ['HUF', ['plastic' => 50.0, 'can' => 50.0, 'glass' => 50.0, 'glass_reusable' => 0.0]],
+        'dk'     => ['DKK', ['plastic' => 1.50, 'can' => 1.00, 'glass' => 1.00, 'glass_reusable' => 1.00]],
+        'se'     => ['SEK', ['plastic' => 2.00, 'can' => 2.00, 'glass' => null, 'glass_reusable' => null]],
+        'fi'     => ['EUR', ['plastic' => 0.20, 'can' => 0.15, 'glass' => 0.10, 'glass_reusable' => 0.10]],
+        'ee'     => ['EUR', ['plastic' => 0.10, 'can' => 0.10, 'glass' => 0.10, 'glass_reusable' => 0.10]],
+        'lv'     => ['EUR', ['plastic' => 0.10, 'can' => 0.10, 'glass' => 0.10, 'glass_reusable' => 0.10]],
+        'nl'     => ['EUR', ['plastic' => 0.15, 'can' => 0.15, 'glass' => null, 'glass_reusable' => null]],
+        'ie'     => ['EUR', ['plastic' => 0.15, 'can' => 0.15, 'glass' => null, 'glass_reusable' => null]],
+        'hr'     => ['EUR', ['plastic' => 0.10, 'can' => 0.10, 'glass' => 0.10, 'glass_reusable' => null]],
+        'mt'     => ['EUR', ['plastic' => 0.10, 'can' => 0.10, 'glass' => 0.10, 'glass_reusable' => 0.10]],
+        'pt'     => ['EUR', ['plastic' => 0.10, 'can' => 0.10, 'glass' => null, 'glass_reusable' => null]],
         'custom' => ['', ['plastic' => 0.25, 'can' => 0.25, 'glass' => 0.25, 'glass_reusable' => 0.25]],
     ];
     check(array_keys($matrix) === array_keys(Scheme::all()), 'scheme list changed: ' . json_encode(array_keys(Scheme::all())));
@@ -380,8 +390,10 @@ section('3 every scheme x category charges the expected default rate', function 
         }
     }
 
-    check(Scheme::get('de')['taxable'] === true, 'DE must be stated including VAT');
-    foreach (['pl', 'ro', 'sk', 'hu', 'at', 'custom'] as $schemeId) {
+    foreach (['de', 'dk', 'se', 'fi'] as $schemeId) {
+        check(Scheme::get($schemeId)['taxable'] === true, "$schemeId must be in the VAT base");
+    }
+    foreach (['pl', 'ro', 'sk', 'hu', 'at', 'ee', 'lv', 'nl', 'ie', 'hr', 'mt', 'pt', 'custom'] as $schemeId) {
         check(Scheme::get($schemeId)['taxable'] === false, "$schemeId must be untaxed");
     }
 });
@@ -432,7 +444,8 @@ section('6 cross-border: each scheme charges only in its own currency', function
     $svc = service(['enabled' => '1', 'default_scheme' => 'pl', 'enable_destination_matching' => '1'], 'PLN');
     check(abs($svc->depositFor($plastic, 'pl') - 0.50) < 1e-9, 'PLN store: plastic in PL must be 0.50');
     check($svc->depositFor($plastic, 'de') === 0.0, 'EUR scheme must not be charged in a PLN store');
-    check(array_keys($svc->unchargeableSchemes()) === ['ro', 'at', 'de', 'sk', 'hu'], 'settings warning must list ro, at, de, sk, hu');
+    $expected = ['ro', 'at', 'de', 'sk', 'hu', 'dk', 'se', 'fi', 'ee', 'lv', 'nl', 'ie', 'hr', 'mt', 'pt'];
+    check(array_keys($svc->unchargeableSchemes()) === $expected, 'settings warning must list every non-PLN scheme');
 });
 
 section('7 notice on block single-product templates, printed once', function (): void {

@@ -7,6 +7,7 @@ namespace Botelix\Admin;
 use Botelix\Contract\HasHooks;
 use Botelix\Model\Scheme;
 use Botelix\Service\DepositService;
+use Botelix\Service\SchemeResolver;
 
 defined('ABSPATH') || exit;
 
@@ -98,7 +99,7 @@ final class SettingsPage implements HasHooks
         <div class="wrap botelix-settings-wrap">
             <h1><?php echo esc_html__('Botelix - Multi-Country Deposit Return Scheme (DRS)', 'botelix'); ?></h1>
             <p class="description">
-                <?php echo esc_html__('Configure statutory container deposit schemes for European ecommerce (Pfand, SGR, Kaucja, Záloh, Visszaváltási díj).', 'botelix'); ?>
+                <?php echo esc_html__('Configure statutory container deposit schemes for European ecommerce.', 'botelix'); ?>
             </p>
 
             <?php
@@ -160,7 +161,13 @@ final class SettingsPage implements HasHooks
                         <td>
                             <label>
                                 <input type="checkbox" name="<?php echo esc_attr(DepositService::OPTION); ?>[enable_destination_matching]" value="1" <?php checked(! empty($settings['enable_destination_matching'])); ?> />
-                                <?php echo esc_html__('Automatically apply the destination country scheme (PL, RO, AT, DE, SK, HU) based on shipping address', 'botelix'); ?>
+                                <?php
+                                echo esc_html(sprintf(
+                                    /* translators: %s: comma-separated country codes, e.g. PL, RO, AT */
+                                    __('Automatically apply the destination country scheme (%s) based on shipping address', 'botelix'),
+                                    implode(', ', array_keys(SchemeResolver::COUNTRY_MAP))
+                                ));
+                                ?>
                             </label>
                         </td>
                     </tr>

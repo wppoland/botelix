@@ -20,6 +20,16 @@ final class SchemeResolver
         'DE' => Scheme::SCHEME_DE,
         'SK' => Scheme::SCHEME_SK,
         'HU' => Scheme::SCHEME_HU,
+        'DK' => Scheme::SCHEME_DK,
+        'SE' => Scheme::SCHEME_SE,
+        'FI' => Scheme::SCHEME_FI,
+        'EE' => Scheme::SCHEME_EE,
+        'LV' => Scheme::SCHEME_LV,
+        'NL' => Scheme::SCHEME_NL,
+        'IE' => Scheme::SCHEME_IE,
+        'HR' => Scheme::SCHEME_HR,
+        'MT' => Scheme::SCHEME_MT,
+        'PT' => Scheme::SCHEME_PT,
     ];
 
     /**
