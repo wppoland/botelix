@@ -4,7 +4,7 @@ Tags: woocommerce, deposit return, pfand, sgr, kaucja
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ Key capabilities:
 * **Cross-Border Destination Matching**: Optionally applies the scheme of the customer's shipping country. A scheme is only charged when its currency matches the store currency, because the rates are set in law in that currency and Botelix does not convert; the settings screen lists every scheme your store cannot charge.
 * **Export Exemption**: Option to exclude container deposits when shipping outside covered deposit jurisdictions.
 * **Product Page Notice**: Displays the deposit notice under the price (for example, "Plus 0,50 zl statutory deposit, refunded when you return the packaging"), on classic and block single-product templates.
+* **Deposit Next to Every Price**: Shop, category, search and related-product listings, classic and block, show the deposit next to the price. In Germany Section 7 PAngV requires the deposit amount next to the total price.
+* **EINWEG and MEHRWEG**: Under the German scheme the price reads EINWEG for single-use and MEHRWEG for reusable containers, inside the price so it has the same font and size, as Section 47 VerpackDG requires for online sales. Section 47 sets exceptions (containers over 3.0 l and some drinks need no MEHRWEG notice); Botelix follows your container tag.
+* **Deposit per Line**: Cart and checkout (classic and block) show each line's deposit; the order stores it per item and prints it on the order page, in the admin and in order emails.
 * **Variation Inheritance**: Variations automatically inherit parent container type and unit count unless explicitly overridden.
 * **Full Compatibility**: Compatible with WooCommerce High-Performance Order Storage (HPOS) and WooCommerce Cart and Checkout Blocks.
 
@@ -82,6 +85,11 @@ Yes. Botelix uses the native WooCommerce cart fees API and declares full compati
 5. Settings under WooCommerce > Deposit Return (DRS): enable switch, default scheme, cross-border matching, export exemption and the Polish scheme's label, notice and statutory rates.
 
 == Changelog ==
+
+= 1.2.0 =
+* Added: the deposit next to the price on shop, category, search and related-product listings, classic and block.
+* Added: EINWEG or MEHRWEG inside the price under the German scheme (Section 47 VerpackDG).
+* Added: the deposit per line in cart and checkout, stored on each order item and shown on the order page, in the admin and in emails.
 
 = 1.1.1 =
 * Fixed: a shop manager could open the settings screen but every save failed with "Sorry, you are not allowed to manage options for this site."
