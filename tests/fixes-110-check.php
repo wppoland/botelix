@@ -144,6 +144,14 @@ function wp_unslash(mixed $value): mixed
 {
     return $value;
 }
+function sanitize_text_field(string $text): string
+{
+    return trim(strip_tags($text));
+}
+function wc_format_decimal(string $value): string
+{
+    return str_replace(',', '.', $value);
+}
 function absint(mixed $value): int
 {
     return abs((int) $value);

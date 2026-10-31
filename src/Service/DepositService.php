@@ -19,6 +19,7 @@ final class DepositService implements HasHooks
     public const META_TYPE   = '_botelix_packaging_type';
     public const META_UNITS  = '_botelix_packaging_units';
     public const META_SCHEME = '_botelix_scheme_override';
+    public const META_AMOUNT = '_botelix_deposit_amount';
 
     /**
      * Order item meta: the deposit snapshot taken when the order was placed.
@@ -229,7 +230,24 @@ final class DepositService implements HasHooks
             return [$active, 0.0, $category];
         }
 
-        return [$active, $this->amountFor($category, $active) * max(1, (int) $units), $category];
+        return [$active, $this->unitAmount($source, $category, $active, $override) * max(1, (int) $units), $category];
+    }
+
+    /**
+     * Deposit per container. The product's own amount replaces the scheme rate
+     * under its home scheme (its override, else the store default) for a
+     * category that scheme covers; under any other scheme the rate applies.
+     */
+    private function unitAmount(\WC_Product $source, string $category, string $active, string $override): float
+    {
+        $own  = (string) $source->get_meta(self::META_AMOUNT, true);
+        $home = $override !== '' ? $override : (string) $this->settings['default_scheme'];
+
+        if ($own !== '' && $active === $home && isset(Scheme::get($active)['rates'][$category])) {
+            return max(0.0, (float) $own);
+        }
+
+        return $this->amountFor($category, $active);
     }
 
     /**

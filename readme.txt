@@ -4,7 +4,7 @@ Tags: woocommerce, deposit return, pfand, sgr, kaucja
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,7 @@ Key capabilities:
 * **Automatic Cart Fee**: Adds the deposit as a dedicated fee at cart and checkout using native WooCommerce fees.
 * **Tax Base Handling**: Where the law states the deposit including VAT (Germany), Botelix adds the net share per tax class, so the customer pays exactly the statutory amount with VAT. Everywhere else the deposit is added untaxed.
 * **One Container Category, Every Scheme**: Tag a product once as single-use plastic bottle, metal can, single-use glass bottle or reusable glass bottle. Each scheme sets its own rate for each category, or does not cover it and charges nothing; the product editor marks the categories the product's scheme does not cover.
+* **Deposit Per Product**: Products in one container category can carry different deposits, for example reusable glass bottles at different Mehrweg rates. Enter a deposit per container on the product or variation; it replaces the scheme rate under the product's own scheme (its override, else the store default) and the rate from the settings applies everywhere else.
 * **Multi-Pack Multiplier**: Multiplies deposit by container count (a 6-pack of cans automatically charges 6 container deposits).
 * **Cross-Border Destination Matching**: Optionally applies the scheme of the customer's shipping country. A scheme is only charged when its currency matches the store currency, because the rates are set in law in that currency and Botelix does not convert; the settings screen lists every scheme your store cannot charge.
 * **Export Exemption**: Option to exclude container deposits when shipping outside covered deposit jurisdictions.
@@ -85,6 +86,9 @@ Yes. Botelix uses the native WooCommerce cart fees API and declares full compati
 5. Settings under WooCommerce > Deposit Return (DRS): enable switch, default scheme, cross-border matching, export exemption and the Polish scheme's label, notice and statutory rates.
 
 == Changelog ==
+
+= 1.3.0 =
+* Added: a deposit per container on each product and variation. It replaces the scheme rate from the settings under the product's own scheme, so products in one container category can carry different deposits.
 
 = 1.2.0 =
 * Added: the deposit next to the price on shop, category, search and related-product listings, classic and block.

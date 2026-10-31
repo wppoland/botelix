@@ -76,6 +76,14 @@ final class ProductMetaBox implements HasHooks
             'custom_attributes' => ['min' => '1', 'step' => '1'],
         ]);
 
+        woocommerce_wp_text_input([
+            'id' => DepositService::META_AMOUNT,
+            'label' => __('Deposit per container', 'botelix'),
+            'description' => __('Optional. Replaces the scheme rate from the settings for this product, in the scheme currency, under the scheme override above or else the store default scheme. Use it where products in the same container category carry different deposits. Leave empty to use the rate from the settings.', 'botelix'),
+            'desc_tip' => true,
+            'data_type' => 'price',
+        ]);
+
         echo '</div>';
     }
 
@@ -110,6 +118,7 @@ final class ProductMetaBox implements HasHooks
         $product->update_meta_data(DepositService::META_SCHEME, $scheme);
         $product->update_meta_data(DepositService::META_TYPE, $type);
         $product->update_meta_data(DepositService::META_UNITS, (string) $units);
+        $product->update_meta_data(DepositService::META_AMOUNT, $this->amount(isset($_POST[DepositService::META_AMOUNT]) ? sanitize_text_field(wp_unslash($_POST[DepositService::META_AMOUNT])) : ''));
         $product->save_meta_data();
     }
 
@@ -150,6 +159,16 @@ final class ProductMetaBox implements HasHooks
             'type' => 'number',
             'custom_attributes' => ['min' => '1', 'step' => '1'],
             'wrapper_class' => 'form-row form-row-last',
+        ]);
+
+        woocommerce_wp_text_input([
+            'id' => DepositService::META_AMOUNT . '[' . $loop . ']',
+            'label' => __('Deposit per container', 'botelix'),
+            'value' => (string) $product->get_meta(DepositService::META_AMOUNT, true),
+            'desc_tip' => true,
+            'description' => __('Optional. Replaces the scheme rate for this variation when it has its own container. Leave empty to use the rate from the settings.', 'botelix'),
+            'data_type' => 'price',
+            'wrapper_class' => 'form-row form-row-first',
         ]);
 
         echo '</div>';
@@ -195,7 +214,19 @@ final class ProductMetaBox implements HasHooks
 
         $product->update_meta_data(DepositService::META_TYPE, $type);
         $product->update_meta_data(DepositService::META_UNITS, (string) $units);
+        $product->update_meta_data(DepositService::META_AMOUNT, $this->amount(isset($_POST[DepositService::META_AMOUNT][$i]) ? sanitize_text_field(wp_unslash($_POST[DepositService::META_AMOUNT][$i])) : ''));
         $product->save_meta_data();
+    }
+
+    /**
+     * A posted deposit amount as a decimal string; blank stays blank, so the
+     * scheme rate applies, and an explicit 0 stays 0.
+     */
+    private function amount(string $value): string
+    {
+        $decimal = trim((string) wc_format_decimal($value));
+
+        return is_numeric($decimal) ? (string) max(0, (float) $decimal) : '';
     }
 
     /**
