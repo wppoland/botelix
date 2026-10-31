@@ -84,6 +84,10 @@ function get_queried_object_id(): int
 {
     return $GLOBALS['queried'];
 }
+function wc_get_price_decimals(): int
+{
+    return 2;
+}
 function wc_tax_enabled(): bool
 {
     return true;
@@ -201,7 +205,9 @@ section('3 deposit next to the price on listings, not on the main product', func
     $GLOBALS['queried'] = 30;
     check(! str_contains($svc->filterPriceHtml('<span>9,99</span>', new WC_Product(31, [], 30)), 'botelix-deposit-notice'), 'variation of the main product must not repeat the notice');
     $GLOBALS['is_product'] = false;
+    check(! str_contains($svc->filterPriceHtml('<span>9,99</span>', new WC_Product(32, [], 30)), 'botelix-deposit-notice'), 'variation loaded over AJAX (is_product false) must not repeat the notice');
     check($svc->filterPriceHtml('', $pack) === '', 'an empty price stays empty');
+    check($svc->filterPriceHtml(null, $pack) === null, 'a non-string price from another plugin passes through');
 });
 
 section('4 deposit row per cart line', function (): void {
@@ -220,6 +226,8 @@ section('5 order item keeps a deposit snapshot and a visible row', function (): 
     $snap = $item->meta[DS::ITEM_META] ?? null;
     check(is_array($snap), 'snapshot meta missing: ' . json_encode($item->meta));
     check($snap['scheme'] === 'de' && $snap['category'] === 'can' && $snap['packaging'] === 'EINWEG', 'snapshot identity wrong: ' . json_encode($snap));
+    $glass = $svc->cartItemData([], ['data' => new WC_Product(52, [DS::META_TYPE => 'glass_reusable'], 0), 'quantity' => 3]);
+    check(str_contains($glass[0]['value'], 'MEHRWEG') && str_contains($glass[0]['value'], '0,45'), 'reusable line must carry MEHRWEG and 0,45: ' . json_encode($glass));
     check(abs($snap['unit'] - 1.0) < 1e-9 && $snap['quantity'] === 2 && abs($snap['total'] - 2.0) < 1e-9, 'snapshot amounts wrong: ' . json_encode($snap));
     check(isset($item->meta['Pfand']) && str_contains((string) $item->meta['Pfand'], '2,00'), 'visible Pfand row missing: ' . json_encode($item->meta));
 

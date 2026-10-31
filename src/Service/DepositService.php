@@ -251,11 +251,17 @@ final class DepositService implements HasHooks
      * Add the packaging label and the deposit to a price. Both sit inside the
      * price markup, so the label takes the price's font and size (VerpackDG
      * s. 47(4)) and the deposit stands next to the price (PAngV s. 7). The main
-     * product of a single product page already gets the notice under its price.
+     * product of a single product page already gets the notice under its price;
+     * so does a variation, whose price only shows in that product's form (also
+     * when the form loads it over AJAX, where is_product() is false).
+     *
+     * @param mixed $html    Price markup; other plugins may pass a non-string.
+     * @param mixed $product Product the price belongs to.
+     * @return mixed
      */
-    public function filterPriceHtml(string $html, \WC_Product $product): string
+    public function filterPriceHtml(mixed $html, mixed $product): mixed
     {
-        if ($html === '' || (is_admin() && ! wp_doing_ajax())) {
+        if (! is_string($html) || $html === '' || ! $product instanceof \WC_Product || (is_admin() && ! wp_doing_ajax())) {
             return $html;
         }
 
@@ -266,7 +272,7 @@ final class DepositService implements HasHooks
             $html .= ' <span class="botelix-packaging-type">' . esc_html($label) . '</span>';
         }
 
-        $main = is_product() && in_array(get_queried_object_id(), [$product->get_id(), $product->get_parent_id()], true);
+        $main = $product->get_parent_id() > 0 || (is_product() && get_queried_object_id() === $product->get_id());
         $text = $main ? '' : $this->noticeText($product);
 
         if ($text !== '') {
@@ -329,7 +335,8 @@ final class DepositService implements HasHooks
         }
 
         $quantity  = max(1, $quantity);
-        $total     = $unit * $quantity;
+        $unit      = round($unit, wc_get_price_decimals());
+        $total     = round($unit * $quantity, wc_get_price_decimals());
         $args      = $currency !== '' ? ['currency' => $currency] : [];
         $packaging = $this->packagingLabel($schemeId, $category);
         $text      = $this->plainPrice($total, $args);
