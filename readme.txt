@@ -4,7 +4,7 @@ Tags: woocommerce, deposit return, pfand, sgr, kaucja
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ Statutory container deposit scheme (DRS) calculations and checkout fees for Euro
 
 National deposit return schemes (DRS) require retailers selling beverages in covered packaging to collect a container deposit and refund it when the empty packaging comes back.
 
-Botelix gives WooCommerce stores one lightweight tool for the deposit rules of six markets:
+Botelix gives WooCommerce stores one lightweight tool for the deposit rules of sixteen markets:
 
 * **Germany (Pfand)**: Section 46(1) VerpackDG sets a deposit of at least 0.25 EUR including VAT per single-use beverage container of 0.1 l to 3.0 l (Section 46(4) lists the exempt drinks). Reusable (Mehrweg) glass bottles have no statutory amount; Botelix starts them at the customary 0.15 EUR, a trade-practice rate you can change in the settings.
 * **Austria (Einwegpfand)**: the Pfandverordnung fuer Einweggetraenkeverpackungen (BGBl. II Nr. 283/2023) Section 4 sets 0.25 EUR per single-use plastic bottle or metal can of 0.1 l to 3.0 l from 1 January 2025, milk drinks excepted. The regulation says nothing about VAT, so Botelix adds the deposit untaxed; a filter switches that if your tax adviser says otherwise.
@@ -22,12 +22,22 @@ Botelix gives WooCommerce stores one lightweight tool for the deposit rules of s
 * **Romania (SGR)**: HG nr. 1074/2021 (republished in M.Of. nr. 1120/2022, as amended) Article 12(5) sets a guarantee of 0.50 RON for every single-use glass, plastic or metal container of 0.1 l to 3 l holding a drink listed in Annex 1, mandatory since 30 November 2023 (Article 10(1)). Under Codul fiscal Article 315^5(2) the guarantee is outside the scope of VAT.
 * **Slovakia (Zalohovy system)**: Vyhlaska c. 347/2019 Z. z. Section 2 sets minimums of 0.12 EUR per plastic bottle and 0.10 EUR per metal can; the scheme administrator sets the actual rate (Zakon c. 302/2019 Z. z. Section 7(1)(g)). Botelix ships the minimums; enter the administrator's current rate in the settings. Under Zakon c. 222/2004 Z. z. Section 22(3) the deposit is not part of the VAT base.
 * **Hungary (DRS)**: 450/2023. (X. 4.) Korm. rendelet Section 3(1) sets a 50 HUF redemption fee per single-use plastic, metal or glass beverage container of 0.1 l to 3 l, from 1 January 2024. The producer sets the fee for reusable containers, so that rate starts at 0 for you to fill in. Botelix adds the fee untaxed.
+* **Denmark (Pant)**: Bekendtgorelse nr. 853 of 28 September 2026 Section 3(2) sets the pant including VAT: 1.50 DKK per plastic bottle up to 99 cl, 1.00 DKK per other container up to 99 cl (cans, single-use glass, refillable glass up to 50 cl), 3.00 DKK for refillable glass over 50 cl and for any container over 99 cl. Botelix ships the rates for the smaller sizes; enter 3.00 on larger products. The pant is in the VAT base (momsloven Section 27(2) no. 2), so Botelix adds the net share in the product's tax class.
+* **Sweden (Pant)**: Forordning (2022:1274) om producentansvar for forpackningar, chapter 4 Section 3, puts plastic bottles and metal cans in a return system and leaves the amount to the operator. Returpack (Pantamera) charges 2 SEK per can and per plastic bottle under 100 cl and 3 SEK over 100 cl (tariff Bilaga 3 Pant och avgifter, 1 April 2026); enter 3.00 on larger bottles, and the printed amount on packs still marked 1 kr. The pant is in the VAT base (Mervardesskattelag 2023:200 chapter 8 Section 13) at the drink's rate, which Botelix takes from the product's tax class.
+* **Finland (Pantti)**: Valtioneuvoston asetus 526/2013 Section 2 sets minimum deposits, and the operator sets the tariff (Jatelaki 646/2011 Sections 68 and 69): 0.15 EUR per metal can, 0.20 EUR per plastic bottle over 0.35 l and under 1.0 l, 0.40 EUR from 1.0 l, 0.10 EUR for other packaging, including plastic up to 0.35 l and glass. Botelix ships 0.20 for plastic; enter 0.10 or 0.40 on other sizes. Refillable glass runs its own return system, so its 0.10 EUR is only the minimum. The deposit is taxed (Arvonlisaverolaki Section 85 b) and Section 139 a allows the drink's rate, so Botelix adds the net share in the product's tax class.
+* **Estonia (Pandipakend)**: Keskkonnaministri maarus nr 19 Section 1(1) sets 0.10 EUR per reusable glass, single-use glass, metal and plastic container; Pakendiseadus Section 21(4^1) item 3 exempts packs under 0.1 l or over 3.0 l. The deposit is outside the VAT base (Kaibemaksuseadus Section 12(12)).
+* **Latvia (Depozita sistema)**: Cabinet Regulation No. 519 of 11 August 2020, point 7, sets 0.10 EUR per container. Annex 1, as replaced by Regulation No. 809 of 22 December 2025, covers PET bottles, cans and single-use and reusable glass bottles of 0.1 l to under 3 l; wine, bitters and liqueurs are excluded from glass. The VAT law Article 39(3)(3) keeps the reusable deposit out of the taxable amount; for single-use packs this rests on State Revenue Service guidance of 28 January 2022, not on the statute. Botelix adds it untaxed; a filter switches that.
+* **Netherlands (Statiegeld)**: Regeling beheer verpakkingen Article 6 sets minimums of 0.15 EUR per plastic bottle under 1 l and 0.25 EUR from 1 l to 3 l, for water and soft drinks only (Besluit beheer verpakkingen 2014 Article 12(1)), and 0.15 EUR per metal drink container up to 3 l (Article 13(1)). Botelix ships 0.15 for plastic; enter 0.25 on larger bottles. Glass is outside the scheme. The deposit is outside the VAT base by administrative approval (Besluit maatstaf van heffing omzetbelasting of 29 September 2025, paragraph 4.4), not by statute; a filter switches that.
+* **Ireland (Deposit Return Scheme)**: S.I. No. 33 of 2024, regulation 18 and the First Schedule (as substituted by S.I. No. 555 of 2024), set 0.15 EUR per PET bottle or aluminium or steel can of 0.15 l to 0.5 l and 0.25 EUR above 0.5 l up to 3 l (regulation 3(1)). Botelix ships 0.15; enter 0.25 on larger products. Glass is outside the scheme. Section 92A(2) of the VAT Consolidation Act 2010 reduces the taxable amount of the deposit to nil.
+* **Croatia (Povratna naknada)**: Uredba NN 137/2024 Article 4 sets 0.10 EUR per single-use plastic, glass or metal beverage container up to 3 l; until 31 December 2026 Article 10(3) limits it to PET, glass and metal of 0.2 l to 3 l. Reusable packaging is outside the scheme. Tax authority guidance (Porezna uprava, 3 October 2025) treats the deposit as a pass-through item outside the VAT base; that is guidance, not statute, and a filter switches it.
+* **Malta (Beverage Container Refund Scheme)**: S.L. 549.134 Third Schedule sets a deposit of at least 0.10 EUR per steel, aluminium, glass or PET container of 0.1 l to 3 l (Second Schedule), single-use (regulation 15) and refillable (regulation 21). Regulation 15(1) says the deposit is not subject to VAT.
+* **Portugal (SDR)**: Despacho n. 432/2026 point 1 sets 0.10 EUR per container whatever its volume or material; Decreto-Lei 152-D/2017 Article 30-B covers single-use plastic, ferrous metal and aluminium beverage containers under 3 l. Glass is outside the scheme. Under Article 30-E(3) the deposit is not taxed.
 * **Custom Scheme**: a rate per container category (0.25 by default) in your store currency for any other deposit scheme, added untaxed.
 
 Key capabilities:
 
 * **Automatic Cart Fee**: Adds the deposit as a dedicated fee at cart and checkout using native WooCommerce fees.
-* **Tax Base Handling**: Where the law states the deposit including VAT (Germany), Botelix adds the net share per tax class, so the customer pays exactly the statutory amount with VAT. Everywhere else the deposit is added untaxed.
+* **Tax Base Handling**: Where the deposit is part of the VAT base (Germany, Denmark, Sweden, Finland), Botelix adds the net share per tax class, so the customer pays exactly the deposit amount with VAT. Everywhere else the deposit is added untaxed.
 * **One Container Category, Every Scheme**: Tag a product once as single-use plastic bottle, metal can, single-use glass bottle or reusable glass bottle. Each scheme sets its own rate for each category, or does not cover it and charges nothing; the product editor marks the categories the product's scheme does not cover.
 * **Deposit Per Product**: Products in one container category can carry different deposits, for example reusable glass bottles at different Mehrweg rates. Enter a deposit per container on the product or variation; it replaces the scheme rate under the product's own scheme (its override, else the store default) and the rate from the settings applies everywhere else.
 * **Multi-Pack Multiplier**: Multiplies deposit by container count (a 6-pack of cans automatically charges 6 container deposits).
@@ -57,7 +67,7 @@ Botelix is fully translatable and ships the `botelix.pot` template. Translations
 
 1. Ensure WooCommerce 8.0 or higher is installed and active.
 2. Install Botelix and activate it.
-3. Go to WooCommerce > Deposit Return (DRS) to select your default scheme (such as Poland, Germany, Romania, Austria, Slovakia, or Hungary) and configure cross-border matching.
+3. Go to WooCommerce > Deposit Return (DRS) to select your default scheme (such as Poland, Germany, Denmark or the Netherlands) and configure cross-border matching.
 4. Edit beverage products to select their packaging container type and container units.
 
 == Frequently Asked Questions ==
@@ -67,12 +77,13 @@ Yes. Set the container units field on the product (for example, 6 for a six-pack
 
 = Are deposits subject to VAT? =
 It depends on national legislation:
-* In Poland (VAT Act Article 29a(11a)), Romania (Codul fiscal Article 315^5(2)) and Slovakia (Zakon c. 222/2004 Z. z. Section 22(3)) the deposit is outside the VAT base, and Botelix adds it untaxed. Hungary and Austria are added untaxed as well.
-* In Germany, Section 46(1) VerpackDG states the deposit including VAT. Botelix adds the net share in the product's tax class and WooCommerce adds the tax, so the customer pays exactly 0.25 EUR.
+* In Poland (VAT Act Article 29a(11a)), Romania (Codul fiscal Article 315^5(2)), Slovakia (Zakon c. 222/2004 Z. z. Section 22(3)), Estonia (Kaibemaksuseadus Section 12(12)), Ireland (VAT Consolidation Act 2010 Section 92A(2)), Malta (S.L. 549.134 regulation 15(1)) and Portugal (Decreto-Lei 152-D/2017 Article 30-E(3)) the deposit is outside the VAT base, and Botelix adds it untaxed. Hungary and Austria are added untaxed as well.
+* The Netherlands, Croatia and Latvia (single-use packs) keep the deposit outside the VAT base by tax authority approval or guidance rather than statute; Botelix adds it untaxed.
+* In Germany, Section 46(1) VerpackDG states the deposit including VAT. Botelix adds the net share in the product's tax class and WooCommerce adds the tax, so the customer pays exactly 0.25 EUR. Denmark, Sweden and Finland work the same way: the deposit is in the VAT base and follows the product's tax class.
 Developers can change a scheme's treatment with the `botelix_scheme_taxable` filter.
 
 = Does Botelix support cross-border sales? =
-Yes. When "Cross-Border Destination Matching" is enabled, Botelix checks the customer shipping country during checkout and applies that country's scheme, but only when the scheme's currency equals the store currency (a PLN store charges nothing for a delivery to Germany, an EUR store charges the German, Austrian or Slovak rate). Botelix never converts currencies. When "Export Exemption" is enabled, orders shipping outside covered DRS jurisdictions are exempted from container deposits.
+Yes. When "Cross-Border Destination Matching" is enabled, Botelix checks the customer shipping country during checkout and applies that country's scheme, but only when the scheme's currency equals the store currency (a PLN store charges nothing for a delivery to Germany, an EUR store charges the rate of any euro scheme). Botelix never converts currencies. When "Export Exemption" is enabled, orders shipping outside covered DRS jurisdictions are exempted from container deposits.
 
 = Does it work with Cart and Checkout Blocks? =
 Yes. Botelix uses the native WooCommerce cart fees API and declares full compatibility with WooCommerce Cart and Checkout Blocks and High-Performance Order Storage (HPOS).
@@ -86,6 +97,10 @@ Yes. Botelix uses the native WooCommerce cart fees API and declares full compati
 5. Settings under WooCommerce > Deposit Return (DRS): enable switch, default scheme, cross-border matching, export exemption and the Polish scheme's label, notice and statutory rates.
 
 == Changelog ==
+
+= 1.4.0 =
+* Added: ten national schemes, Denmark, Sweden, Finland, Estonia, Latvia, the Netherlands, Ireland, Croatia, Malta and Portugal, each with its act, rates per container category and VAT treatment, and matched by shipping country.
+* Changed: where a scheme's amount depends on the container size, the settings ship the common size and the rate label names the other amounts, to enter on the product.
 
 = 1.3.0 =
 * Added: a deposit per container on each product and variation. It replaces the scheme rate from the settings under the product's own scheme, so products in one container category can carry different deposits.

@@ -17,6 +17,16 @@ final class Scheme
     public const SCHEME_DE = 'de';
     public const SCHEME_SK = 'sk';
     public const SCHEME_HU = 'hu';
+    public const SCHEME_DK = 'dk';
+    public const SCHEME_SE = 'se';
+    public const SCHEME_FI = 'fi';
+    public const SCHEME_EE = 'ee';
+    public const SCHEME_LV = 'lv';
+    public const SCHEME_NL = 'nl';
+    public const SCHEME_IE = 'ie';
+    public const SCHEME_HR = 'hr';
+    public const SCHEME_MT = 'mt';
+    public const SCHEME_PT = 'pt';
     public const SCHEME_CUSTOM = 'custom';
 
     /**
@@ -155,6 +165,207 @@ final class Scheme
                     'can' => ['amount' => 50.0, 'label' => $can],
                     'glass' => ['amount' => 50.0, 'label' => $glass],
                     'glass_reusable' => ['amount' => 0.0, 'label' => __('Reusable glass bottle (fee set by the producer, enter it here)', 'botelix')],
+                ],
+            ],
+            self::SCHEME_DK => [
+                'name' => __('Denmark (Pant)', 'botelix'),
+                'law' => 'Bekendtgørelse nr. 853 af 28/09/2026 om pantbelagte drikkevareemballager, § 3 stk. 2',
+                'currency' => 'DKK',
+                // § 3 stk. 2 states every amount "inklusiv moms"; momsloven s. 27(2) no. 2
+                // puts packaging charged to the buyer in the tax base.
+                'taxable' => true,
+                'default_label' => __('Deposit (pant)', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 1,00 kr */
+                'default_notice' => __('Plus %s deposit (pant), refunded when you return the container.', 'botelix'),
+                // § 3 stk. 2: nr. 1 plastic up to 99 cl 1.50; nr. 3 other packaging up to
+                // 99 cl 1.00 (refillable glass up to 50 cl included); nr. 2 refillable
+                // glass over 50 cl 3.00; nr. 4 anything over 99 cl 3.00. One rate per
+                // category, so the common size is the default and the product takes
+                // the other amount.
+                'rates' => [
+                    'plastic' => ['amount' => 1.50, 'label' => __('Plastic bottle up to 99 cl (over 99 cl: 3.00 DKK, set it on the product)', 'botelix')],
+                    'can' => ['amount' => 1.00, 'label' => __('Metal can up to 99 cl (over 99 cl: 3.00 DKK, set it on the product)', 'botelix')],
+                    'glass' => ['amount' => 1.00, 'label' => __('Single-use glass bottle up to 99 cl (over 99 cl: 3.00 DKK, set it on the product)', 'botelix')],
+                    'glass_reusable' => ['amount' => 1.00, 'label' => __('Refillable glass bottle up to 50 cl (over 50 cl: 3.00 DKK, set it on the product)', 'botelix')],
+                ],
+            ],
+            self::SCHEME_SE => [
+                'name' => __('Sweden (Pant)', 'botelix'),
+                'law' => 'Förordning (2022:1274) om producentansvar för förpackningar, 4 kap. 3 §; pant set by Returpack (Bilaga 3 Pant och avgifter, 2026-04-01)',
+                'currency' => 'SEK',
+                // Mervärdesskattelag (2023:200) 8 kap. 13 §: packaging charged to the
+                // buyer is in the tax base. The pant follows the drink's VAT rate, which
+                // the fee takes from the product's tax class.
+                'taxable' => true,
+                'default_label' => __('Deposit (pant)', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 1,00 kr */
+                'default_notice' => __('Plus %s deposit (pant), refunded when you return the container.', 'botelix'),
+                // The ordinance sets no amount; these are the operator's consumer
+                // amounts. Plastic bottles and metal cans only. A pack still marked
+                // 1 kr takes its printed amount on the product.
+                'rates' => [
+                    'plastic' => ['amount' => 2.00, 'label' => __('Plastic bottle under 100 cl, operator rate (over 100 cl: 3.00 SEK, set it on the product)', 'botelix')],
+                    'can' => ['amount' => 2.00, 'label' => __('Metal can, operator rate', 'botelix')],
+                    'glass' => null,
+                    'glass_reusable' => null,
+                ],
+            ],
+            self::SCHEME_FI => [
+                'name' => __('Finland (Pantti)', 'botelix'),
+                'law' => 'Jätelaki 646/2011, 68-69 §; Valtioneuvoston asetus 526/2013, 2 §',
+                'currency' => 'EUR',
+                // Arvonlisäverolaki 1501/1993 85 b §: the deposit is taxed; 139 a § allows
+                // the drink's own rate, which the fee takes from the product's tax class.
+                'taxable' => true,
+                'default_label' => __('Deposit (pantti)', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 0,20 EUR */
+                'default_notice' => __('Plus %s deposit (pantti), refunded when you return the container.', 'botelix'),
+                // Asetus 526/2013 2 § minimums: 0.15 metal; 0.20 plastic over 0.35 l and
+                // under 1.0 l; 0.40 plastic 1.0 l or more; 0.10 other packaging. Refillable
+                // glass runs its own return system, so 0.10 is only the minimum.
+                'rates' => [
+                    'plastic' => ['amount' => 0.20, 'label' => __('Plastic bottle over 0.35 l and under 1.0 l (up to 0.35 l: 0.10 EUR, 1.0 l or more: 0.40 EUR, set it on the product)', 'botelix')],
+                    'can' => ['amount' => 0.15, 'label' => __('Metal can', 'botelix')],
+                    'glass' => ['amount' => 0.10, 'label' => __('Single-use glass bottle', 'botelix')],
+                    'glass_reusable' => ['amount' => 0.10, 'label' => __('Refillable glass bottle (statutory minimum, enter the rate of its own return system)', 'botelix')],
+                ],
+            ],
+            self::SCHEME_EE => [
+                'name' => __('Estonia (Pandipakend)', 'botelix'),
+                'law' => 'Pakendiseadus § 21; Keskkonnaministri määrus nr 19 (23.03.2005) § 1',
+                'currency' => 'EUR',
+                // Käibemaksuseadus § 12 lg 12: the deposit is not part of the taxable value.
+                'taxable' => false,
+                'default_label' => __('Deposit (tagatisraha)', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 0,10 EUR */
+                'default_notice' => __('Plus %s deposit (tagatisraha), refunded when you return the container.', 'botelix'),
+                // Määrus nr 19 § 1 lg 1 p 1-6: 0.10 for every category; PakS § 21 lg 4^1
+                // p 3: none under 0.1 l or over 3.0 l.
+                'rates' => [
+                    'plastic' => ['amount' => 0.10, 'label' => $plastic],
+                    'can' => ['amount' => 0.10, 'label' => $can],
+                    'glass' => ['amount' => 0.10, 'label' => $glass],
+                    'glass_reusable' => ['amount' => 0.10, 'label' => __('Reusable glass bottle 0.1 l to 3 l', 'botelix')],
+                ],
+            ],
+            self::SCHEME_LV => [
+                'name' => __('Latvia (Depozīta sistēma)', 'botelix'),
+                'law' => 'MK noteikumi Nr. 519 (11.08.2020), point 7 and Annex 1, as amended by MK 589/2022 and MK 809/2025',
+                'currency' => 'EUR',
+                // PVN likums art. 39(3)(3) keeps the reusable deposit out of the taxable
+                // amount; for single-use packs only VID guidance (28.01.2022) says so.
+                // A reading, not a statute, for single-use: the botelix_scheme_taxable
+                // filter flips it.
+                'taxable' => false,
+                'default_label' => __('Deposit (depozīta maksa)', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 0,10 EUR */
+                'default_notice' => __('Plus %s deposit (depozīta maksa), refunded when you return the container.', 'botelix'),
+                // Point 7: 0.10 per unit; point 2 covers single-use and reusable packs;
+                // Annex 1: PET, cans and glass 0.1 l to under 3 l. Wine, sparkling,
+                // fruit, mulled and aromatised wine, bitters and liqueurs are out of glass.
+                'rates' => [
+                    'plastic' => ['amount' => 0.10, 'label' => __('PET bottle 0.1 l to under 3 l', 'botelix')],
+                    'can' => ['amount' => 0.10, 'label' => __('Metal can 0.1 l to under 3 l', 'botelix')],
+                    'glass' => ['amount' => 0.10, 'label' => __('Single-use glass bottle 0.1 l to under 3 l (not wine, bitters or liqueurs)', 'botelix')],
+                    'glass_reusable' => ['amount' => 0.10, 'label' => __('Reusable glass bottle 0.1 l to under 3 l (not wine, bitters or liqueurs)', 'botelix')],
+                ],
+            ],
+            self::SCHEME_NL => [
+                'name' => __('Netherlands (Statiegeld)', 'botelix'),
+                'law' => 'Besluit beheer verpakkingen 2014, art. 12-14; Regeling beheer verpakkingen, art. 6',
+                'currency' => 'EUR',
+                // Besluit maatstaf van heffing omzetbelasting (2025-23004) par. 4.4: by
+                // approval, not statute, statiegeld is not part of the vergoeding. The
+                // botelix_scheme_taxable filter flips it.
+                'taxable' => false,
+                'default_label' => __('Deposit (statiegeld)', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 0,15 EUR */
+                'default_notice' => __('Plus %s deposit (statiegeld), refunded when you return the container.', 'botelix'),
+                // Regeling art. 6(1): plastic bottle under 1 l 0.15, 1 l to 3 l 0.25,
+                // water and frisdrank only (Besluit art. 12(1)); art. 6(2): metal
+                // container up to 3 l 0.15, any drink. Statutory minimums. Glass is out.
+                'rates' => [
+                    'plastic' => ['amount' => 0.15, 'label' => __('Plastic bottle under 1 l, water or soft drink (1 l to 3 l: 0.25 EUR, set it on the product)', 'botelix')],
+                    'can' => ['amount' => 0.15, 'label' => __('Metal can up to 3 l', 'botelix')],
+                    'glass' => null,
+                    'glass_reusable' => null,
+                ],
+            ],
+            self::SCHEME_IE => [
+                'name' => __('Ireland (Deposit Return Scheme)', 'botelix'),
+                'law' => 'S.I. No. 33 of 2024, reg. 18 and First Schedule (as substituted by S.I. No. 555 of 2024)',
+                'currency' => 'EUR',
+                // VAT Consolidation Act 2010 s. 92A(2): the taxable amount referable to
+                // the deposit is deemed reduced to nil.
+                'taxable' => false,
+                'default_label' => __('Deposit', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 0,15 EUR */
+                'default_notice' => __('Plus %s deposit, refunded when you return the container.', 'botelix'),
+                // First Schedule: 0.15 up to 0.5 l, 0.25 over 0.5 l; reg. 3(1): PET
+                // bottles and aluminium or steel containers of 0.150 l to 3 l. Glass is out.
+                'rates' => [
+                    'plastic' => ['amount' => 0.15, 'label' => __('PET bottle 0.15 l to 0.5 l (over 0.5 l: 0.25 EUR, set it on the product)', 'botelix')],
+                    'can' => ['amount' => 0.15, 'label' => __('Aluminium or steel can 0.15 l to 0.5 l (over 0.5 l: 0.25 EUR, set it on the product)', 'botelix')],
+                    'glass' => null,
+                    'glass_reusable' => null,
+                ],
+            ],
+            self::SCHEME_HR => [
+                'name' => __('Croatia (Povratna naknada)', 'botelix'),
+                'law' => 'Uredba o naknadi gospodarenja otpadom i povratnoj naknadi (NN 137/2024), čl. 4 and čl. 10(3)',
+                'currency' => 'EUR',
+                // Porezna uprava guidance "Povratna naknada" (3.10.2025): collected on
+                // behalf of the Fund, a pass-through item outside the base. Guidance,
+                // not a statute: the botelix_scheme_taxable filter flips it.
+                'taxable' => false,
+                'default_label' => __('Deposit (povratna naknada)', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 0,10 EUR */
+                'default_notice' => __('Plus %s deposit (povratna naknada), refunded when you return the container.', 'botelix'),
+                // Čl. 4(1)-(2): 0.10 per single-use plastic, glass or metal pack up to
+                // 3 l; čl. 10(3): until 31.12.2026 only PET, glass or metal of 0.2 l to 3 l.
+                // Reusable packaging is not in the scheme.
+                'rates' => [
+                    'plastic' => ['amount' => 0.10, 'label' => __('PET bottle 0.2 l to 3 l (until 31.12.2026; from 2027 any single-use plastic up to 3 l)', 'botelix')],
+                    'can' => ['amount' => 0.10, 'label' => __('Metal can 0.2 l to 3 l (until 31.12.2026; from 2027 up to 3 l)', 'botelix')],
+                    'glass' => ['amount' => 0.10, 'label' => __('Single-use glass bottle 0.2 l to 3 l (until 31.12.2026; from 2027 up to 3 l)', 'botelix')],
+                    'glass_reusable' => null,
+                ],
+            ],
+            self::SCHEME_MT => [
+                'name' => __('Malta (Beverage Container Refund Scheme)', 'botelix'),
+                'law' => 'Beverage Containers Recycling Regulations (S.L. 549.134), reg. 15, reg. 21 and Third Schedule',
+                'currency' => 'EUR',
+                // Reg. 15(1) and 21(1): "The deposit value shall not be subject to VAT".
+                'taxable' => false,
+                'default_label' => __('Deposit (depożitu)', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 0,10 EUR */
+                'default_notice' => __('Plus %s deposit (depożitu), refunded when you return the container.', 'botelix'),
+                // Third Schedule: at least 0.10; Second Schedule: steel, aluminium, glass
+                // and PET of 0.1 l to 3 l. Reg. 21 covers refillables of any of these.
+                'rates' => [
+                    'plastic' => ['amount' => 0.10, 'label' => __('PET bottle 0.1 l to 3 l (statutory minimum)', 'botelix')],
+                    'can' => ['amount' => 0.10, 'label' => __('Steel or aluminium can 0.1 l to 3 l (statutory minimum)', 'botelix')],
+                    'glass' => ['amount' => 0.10, 'label' => __('Single-use glass bottle 0.1 l to 3 l (statutory minimum)', 'botelix')],
+                    'glass_reusable' => ['amount' => 0.10, 'label' => __('Refillable container 0.1 l to 3 l (statutory minimum, the producer system sets the value)', 'botelix')],
+                ],
+            ],
+            self::SCHEME_PT => [
+                'name' => __('Portugal (Sistema de Depósito e Reembolso)', 'botelix'),
+                'law' => 'Decreto-Lei n.º 152-D/2017, art. 30.º-B and 30.º-E; Despacho n.º 432/2026, point 1',
+                'currency' => 'EUR',
+                // Art. 30.º-E(3): the deposit value "não está sujeito a tributação".
+                'taxable' => false,
+                'default_label' => __('Deposit (depósito)', 'botelix'),
+                /* translators: %s: formatted deposit amount, e.g. 0,10 EUR */
+                'default_notice' => __('Plus %s deposit (depósito), refunded when you return the container.', 'botelix'),
+                // Despacho 432/2026 point 1: 0.10 whatever the volume or material; art.
+                // 30.º-B: single-use plastic, ferrous metal and aluminium under 3 l.
+                // Glass is out.
+                'rates' => [
+                    'plastic' => ['amount' => 0.10, 'label' => __('Single-use plastic bottle under 3 l', 'botelix')],
+                    'can' => ['amount' => 0.10, 'label' => __('Metal can under 3 l', 'botelix')],
+                    'glass' => null,
+                    'glass_reusable' => null,
                 ],
             ],
             self::SCHEME_CUSTOM => [
