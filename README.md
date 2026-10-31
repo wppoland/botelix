@@ -12,7 +12,7 @@ Multi-country statutory deposit return scheme (DRS / Pfand / SGR / Kaucja / Zalo
 - **Hungary (DRS)**: 450/2023. (X. 4.) Korm. rendelet Section 3(1): 50 HUF per single-use plastic, metal or glass container; the producer sets the reusable fee. Added untaxed.
 - **Custom Scheme**: a rate per container category and a label in the store currency for any other jurisdiction, added untaxed.
 
-Each product carries one container category: single-use plastic bottle, metal can, single-use glass bottle or reusable glass bottle. A scheme charges its rate for that category, or nothing where it does not cover it. A scheme is only charged when its currency equals the store currency; Botelix does not convert.
+Each product carries one container category: single-use plastic bottle, metal can, single-use glass bottle or reusable glass bottle. A scheme charges its rate for that category, or nothing where it does not cover it. A deposit per container entered on the product or variation replaces that rate under the product's own scheme (its override, else the store default). A scheme is only charged when its currency equals the store currency; Botelix does not convert.
 
 ## Requirements
 
