@@ -25,6 +25,8 @@ final class SettingsPage implements HasHooks
     {
         add_action('admin_menu', [$this, 'registerMenu']);
         add_action('admin_init', [$this, 'registerSettings']);
+        // options.php checks manage_options unless the group says otherwise.
+        add_filter('option_page_capability_' . self::PAGE_SLUG, static fn (): string => 'manage_woocommerce');
     }
 
     public function registerMenu(): void

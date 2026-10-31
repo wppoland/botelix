@@ -4,7 +4,7 @@ Tags: woocommerce, deposit return, pfand, sgr, kaucja
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,9 @@ Yes. Botelix uses the native WooCommerce cart fees API and declares full compati
 5. Settings under WooCommerce > Deposit Return (DRS): enable switch, default scheme, cross-border matching, export exemption and the Polish scheme's label, notice and statutory rates.
 
 == Changelog ==
+
+= 1.1.1 =
+* Fixed: a shop manager could open the settings screen but every save failed with "Sorry, you are not allowed to manage options for this site."
 
 = 1.1.0 =
 * Fixed: a fresh install charged nothing until the settings were saved once.
