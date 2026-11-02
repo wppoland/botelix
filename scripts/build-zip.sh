@@ -20,3 +20,8 @@ find "${STAGE}" -name '.DS_Store' -delete
 rm -f "/tmp/${NAME}.zip"
 ( cd "${OUT_DIR}" && zip -rqX "/tmp/${NAME}.zip" "${NAME}" -x '*.DS_Store' )
 echo "Built /tmp/${NAME}.zip from ${STAGE}"
+
+if [ -d "${HOME}/Downloads" ]; then
+    cp "/tmp/${NAME}.zip" "${HOME}/Downloads/${NAME}.zip"
+    echo "Copied /tmp/${NAME}.zip to ${HOME}/Downloads/${NAME}.zip"
+fi

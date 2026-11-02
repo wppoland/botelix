@@ -241,6 +241,37 @@ final class SettingsPage implements HasHooks
 
                 <?php submit_button(); ?>
             </form>
+            <?php $this->renderCompanionCard(); ?>
+        </div>
+        <?php
+    }
+
+    /**
+     * Cross-recommendation card for sister plugins (Shoplex EU Compliance).
+     * Strictly scoped to the Botelix settings screen per WordPress.org Guideline 11.
+     */
+    private function renderCompanionCard(): void
+    {
+        $isShoplexActive = defined('\\Shoplex\\VERSION') || (function_exists('is_plugin_active') && (is_plugin_active('shoplex/shoplex.php') || is_plugin_active('plogins-shoplex/shoplex.php')));
+
+        ?>
+        <div class="card" style="max-width: 800px; margin-top: 24px; padding: 18px 22px;">
+            <h2 class="title" style="margin-top: 0; font-size: 15px;"><?php echo esc_html__('Complementary integration: Shoplex - EU Compliance for WooCommerce', 'botelix'); ?></h2>
+            <p style="color: #50575e; line-height: 1.5;">
+                <?php echo esc_html__('Pair Botelix deposit return automation with Shoplex for complete EU storewide compliance, including Omnibus price tracking, food nutrition disclosures, and statutory consumer notices.', 'botelix'); ?>
+            </p>
+            <?php if ($isShoplexActive) : ?>
+                <p style="color: #007017; font-weight: 600; margin-bottom: 0;">
+                    <span class="dashicons dashicons-yes-alt" style="vertical-align: text-bottom;"></span>
+                    <?php echo esc_html__('Shoplex is active.', 'botelix'); ?>
+                </p>
+            <?php else : ?>
+                <p style="margin-bottom: 0;">
+                    <a href="<?php echo esc_url(admin_url('plugin-install.php?s=' . rawurlencode('Shoplex - EU Compliance for WooCommerce') . '&tab=search&type=term')); ?>" class="button button-secondary">
+                        <?php echo esc_html__('Explore Shoplex EU Compliance', 'botelix'); ?> &rarr;
+                    </a>
+                </p>
+            <?php endif; ?>
         </div>
         <?php
     }

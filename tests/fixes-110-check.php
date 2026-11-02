@@ -99,6 +99,14 @@ function esc_attr(string $text): string
 {
     return $text;
 }
+function esc_url(string $url): string
+{
+    return $url;
+}
+function admin_url(string $path = ''): string
+{
+    return 'http://example.com/wp-admin/' . $path;
+}
 function checked(mixed $checked, mixed $current = true): void
 {
 }
