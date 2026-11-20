@@ -1,5 +1,8 @@
 # Botelix - Deposit Return Scheme (Pfand, SGR, Kaucja, Zaloh)
 
+- **Plugin page:** https://plogins.com/botelix/
+- **Documentation:** https://plogins.com/botelix/docs/
+
 Multi-country statutory deposit return scheme (DRS / Pfand / SGR / Kaucja / Zaloh / Visszavaltasi dij) compliance for WooCommerce stores.
 
 ## Supported Schemes & Legal Basis
