@@ -14,6 +14,12 @@ define('ABSPATH', __DIR__);
 
 require_once __DIR__ . '/../autoload.php';
 
+function plugin_basename(string $file): string
+{
+    return basename($file);
+}
+define('Botelix\PLUGIN_FILE', __FILE__);
+
 $filters = [];
 
 function add_action(string $tag, mixed $callback, int $priority = 10, int $args = 1): void
