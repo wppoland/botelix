@@ -2,7 +2,7 @@
 Contributors: motylanogha
 Tags: woocommerce, deposit return, pfand, sgr, kaucja
 Requires at least: 6.5
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 8.1
 Stable tag: 1.5.1
 License: GPLv2 or later
