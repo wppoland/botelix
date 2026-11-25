@@ -4,7 +4,7 @@ Tags: woocommerce, deposit return, pfand, sgr, kaucja
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -97,6 +97,9 @@ Yes. Botelix uses the native WooCommerce cart fees API and declares full compati
 5. Settings under WooCommerce > Deposit Return (DRS): enable switch, default scheme, cross-border matching, export exemption and the Polish scheme's label, notice and statutory rates.
 
 == Changelog ==
+
+= 1.5.1 =
+* Plugins list shows a shortcut to the settings screen.
 
 = 1.5.0 =
 * Added: crate / outer packaging deposit (Kastenpfand) on products and variations, charged on top of per-container deposits for beverage crates and cases.
